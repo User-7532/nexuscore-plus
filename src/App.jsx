@@ -16,6 +16,8 @@ import Settings from '@/pages/Settings';
 import Practice from '@/pages/Practice';
 import PracticeReview from '@/pages/PracticeReview';
 import PracticeStats from '@/pages/PracticeStats';
+import Code from '@/pages/Code';
+import CodeWorkspace from '@/pages/CodeWorkspace';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
@@ -63,6 +65,8 @@ const AuthenticatedApp = () => {
           <Route path="/practice" element={<Practice />} />
           <Route path="/practice/review" element={<PracticeReview />} />
           <Route path="/practice/stats" element={<PracticeStats />} />
+          <Route path="/code" element={<Code />} />
+          <Route path="/code/:problemId" element={<CodeWorkspace />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/projects/:id" element={<ProjectDetail />} />
           <Route path="/settings" element={<Settings />} />
