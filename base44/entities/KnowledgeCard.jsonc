@@ -50,6 +50,30 @@
     "last_visited_at": {
       "type": "string",
       "format": "date-time"
+    },
+    "field": {
+      "type": "string",
+      "description": "大分野のID（active-inference / math-physics / computation / neuroscience / social）"
+    },
+    "subfield": {
+      "type": "string",
+      "description": "下位分野のID（src/lib/taxonomy.js）"
+    },
+    "verifiable": {
+      "type": "string",
+      "description": "解釈が中心の分野で、確かめられる事実だけをまとめた部分"
+    },
+    "interpretation": {
+      "type": "string",
+      "description": "解釈が中心の分野で、解釈・仮説としてまとめた部分"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "dialogue",
+        "field"
+      ],
+      "description": "dialogue=対話から / field=分野を選んでAIが作成"
     }
   },
   "required": [

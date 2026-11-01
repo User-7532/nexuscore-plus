@@ -20,6 +20,12 @@
     "mode": {
       "type": "string",
       "description": "practice / review"
+    },
+    "field": {
+      "type": "string"
+    },
+    "subfield": {
+      "type": "string"
     }
   },
   "required": [
