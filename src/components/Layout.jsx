@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Sun, MessagesSquare, Layers, Hammer, Repeat, Settings as SettingsIcon } from 'lucide-react';
+import { Sun, MessagesSquare, Layers, Hammer, Repeat, Code2, Settings as SettingsIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import AssistantChat from '@/components/assistant/AssistantChat';
 
 // short はスマートフォンの下部ナビ用の短い名前
 const navItems = [
@@ -8,6 +9,7 @@ const navItems = [
   { to: '/tutor', label: '学びの対話', short: '対話', icon: MessagesSquare },
   { to: '/cards', label: '知識カード', short: 'カード', icon: Layers },
   { to: '/practice', label: '練習と復習', short: '練習', icon: Repeat },
+  { to: '/code', label: 'コーディング', short: 'コード', icon: Code2 },
   { to: '/projects', label: 'プロジェクト', short: '制作', icon: Hammer },
   { to: '/settings', label: '設定', short: '設定', icon: SettingsIcon },
 ];
@@ -78,7 +80,7 @@ export default function Layout() {
                 end={item.end}
                 className={({ isActive }) =>
                   cn(
-                    'flex flex-1 flex-col items-center gap-1 rounded-2xl py-1.5 text-[10.5px] transition-colors',
+                    'flex min-w-0 flex-1 flex-col items-center gap-1 rounded-2xl py-1.5 text-[10px] transition-colors',
                     isActive ? 'text-primary' : 'text-muted-foreground'
                   )
                 }
