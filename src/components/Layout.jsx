@@ -1,13 +1,15 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Sun, MessagesSquare, Layers, Hammer, Settings as SettingsIcon } from 'lucide-react';
+import { Sun, MessagesSquare, Layers, Hammer, Repeat, Settings as SettingsIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// short はスマートフォンの下部ナビ用の短い名前
 const navItems = [
-  { to: '/', label: '今日', icon: Sun, end: true },
-  { to: '/tutor', label: '学びの対話', icon: MessagesSquare },
-  { to: '/cards', label: '知識カード', icon: Layers },
-  { to: '/projects', label: 'プロジェクト', icon: Hammer },
-  { to: '/settings', label: '設定', icon: SettingsIcon },
+  { to: '/', label: '今日', short: '今日', icon: Sun, end: true },
+  { to: '/tutor', label: '学びの対話', short: '対話', icon: MessagesSquare },
+  { to: '/cards', label: '知識カード', short: 'カード', icon: Layers },
+  { to: '/practice', label: '練習と復習', short: '練習', icon: Repeat },
+  { to: '/projects', label: 'プロジェクト', short: '制作', icon: Hammer },
+  { to: '/settings', label: '設定', short: '設定', icon: SettingsIcon },
 ];
 
 function Brand() {
@@ -82,7 +84,7 @@ export default function Layout() {
                 }
               >
                 <item.icon className="h-[18px] w-[18px]" strokeWidth={1.6} />
-                {item.label}
+                {item.short}
               </NavLink>
             ))}
           </nav>
