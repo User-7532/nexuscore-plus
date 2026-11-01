@@ -1,0 +1,57 @@
+{
+  "name": "PracticeQuestion",
+  "type": "object",
+  "properties": {
+    "card_id": {
+      "type": "string",
+      "description": "\u3082\u3068\u306b\u306a\u3063\u305f\u77e5\u8b58\u30ab\u30fc\u30c9"
+    },
+    "domain": {
+      "type": "string",
+      "description": "\u5206\u91ce\u540d\uff08\u30ab\u30fc\u30c9\u304b\u3089\u5f15\u304d\u7d99\u3050\uff09"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "cloze",
+        "written"
+      ],
+      "default": "cloze",
+      "description": "cloze=\u7a74\u57cb\u3081 / written=\u8a18\u8ff0"
+    },
+    "text": {
+      "type": "string",
+      "description": "\u7a74\u57cb\u3081\u306e\u6587\u7ae0\uff08\u7a7a\u6240\u306f ___\uff09\u307e\u305f\u306f\u8a18\u8ff0\u306e\u554f\u3044"
+    },
+    "answer": {
+      "type": "string",
+      "description": "\u7a7a\u6240\u306b\u5165\u308b\u8a9e\u53e5\uff08\u8a18\u8ff0\u3067\u306f\u8981\u70b9\uff09"
+    },
+    "model_answer": {
+      "type": "string",
+      "description": "\u8a18\u8ff0\u306e\u6a21\u7bc4\u89e3\u7b54"
+    },
+    "explanation": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "card_id",
+    "text",
+    "answer"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}
