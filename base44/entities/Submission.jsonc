@@ -1,0 +1,97 @@
+{
+  "name": "Submission",
+  "type": "object",
+  "properties": {
+    "problem_id": {
+      "type": "string"
+    },
+    "problem_title": {
+      "type": "string"
+    },
+    "language": {
+      "type": "string"
+    },
+    "code": {
+      "type": "string"
+    },
+    "verdict": {
+      "type": "string",
+      "enum": [
+        "correct",
+        "partial",
+        "wrong"
+      ],
+      "description": "AI\u306e\u5224\u5b9a"
+    },
+    "score": {
+      "type": "number",
+      "description": "0-100\u70b9"
+    },
+    "time_complexity": {
+      "type": "string"
+    },
+    "space_complexity": {
+      "type": "string"
+    },
+    "test_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "case": {
+            "type": "string"
+          },
+          "passed": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "explanation": {
+      "type": "string"
+    },
+    "topics": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "field": {
+      "type": "string"
+    },
+    "hints_used": {
+      "type": "number",
+      "default": 0
+    },
+    "duration_seconds": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "problem_id",
+    "verdict"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}
