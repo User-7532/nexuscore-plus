@@ -23,6 +23,8 @@ export function recordPractice({ question, card, correct, mode = 'practice' }) {
     question_id: question?.id || '',
     card_id: card.id,
     domain: card.domain || '',
+    field: card.field || '',
+    subfield: card.subfield || '',
     kind: question?.kind || 'cloze',
     correct,
     mode,
