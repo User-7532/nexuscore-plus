@@ -12,6 +12,7 @@ export const FIELDS = [
       { id: 'predictive-coding', label: '生成モデルと予測符号化', mode: 'fact', scope: '階層的生成モデル、予測誤差、精度（precision）の重みづけ' },
       { id: 'action-selection', label: '期待自由エネルギーと行為選択', mode: 'fact', scope: '期待自由エネルギー、認識的価値と実用的価値、方策の推論' },
       { id: 'markov-blanket', label: 'マルコフブランケット', mode: 'fact', scope: '条件付き独立、内部状態と外部状態、境界の定義をめぐる議論' },
+      { id: 'social-inference', label: '集団・社会と能動的推論', mode: 'interpret', scope: '集団の維持、規範や文化の共有、集団での信念の同期を、能動的推論の枠組みで捉える試み' },
     ],
   },
   {
@@ -48,22 +49,18 @@ export const FIELDS = [
       { id: 'cellular', label: '細胞・シナプス生理', mode: 'fact', scope: '活動電位、シナプス可塑性、LTP・LTD' },
       { id: 'computational-neuro', label: '計算論的神経科学', mode: 'fact', scope: '神経回路モデル、強化学習とドーパミン、ベイズ脳' },
       { id: 'consciousness', label: '意識と知覚の神経基盤', mode: 'fact', scope: '意識の神経相関、主要な意識理論とその検証状況' },
-    ],
-  },
-  {
-    id: 'social',
-    label: '社会科学',
-    subfields: [
-      { id: 'neuro-case', label: '神経科学で読むケーススタディ', mode: 'interpret', scope: '宗教・文化・歴史の中の事例（例: スーフィズムのマジュズーブ）を、神経科学の知見と照らして考察する' },
+      { id: 'neuro-case', label: '宗教・文化的実践と神経科学', mode: 'interpret', scope: '宗教的実践や文化の中の事例（例: スーフィズムのマジュズーブ、瞑想、儀礼）を、神経科学の知見と照らして考察する' },
       { id: 'thought-neuro', label: '思想と神経科学', mode: 'interpret', scope: '哲学・宗教思想・心理学の考え方と、神経科学の知見を結びつける' },
-      { id: 'hidden-suffering', label: '見えにくい苦しみ', mode: 'interpret', scope: '外から見えにくい苦しみの例と、その背景にある社会的・神経科学的な仕組み' },
-      { id: 'geopolitics', label: '地政学', mode: 'fact', scope: '地理的条件と国家戦略、主要な地域の構図' },
-      { id: 'geo-history', label: '地理・歴史', mode: 'fact', scope: '世界史・日本史の主要な出来事と、その地理的背景' },
-      { id: 'business-econ', label: 'ビジネス・経済', mode: 'fact', scope: 'ミクロ・マクロ経済の基礎、企業の仕組み、主要な指標' },
-      { id: 'assets', label: '資産形成・金融リテラシー', mode: 'fact', scope: '複利、分散投資、リスクとリターン、税制の基礎' },
+      { id: 'hidden-suffering', label: '見えにくい苦しみの神経科学', mode: 'interpret', scope: '外から見えにくい苦しみの例と、その背景にある神経科学的な仕組み' },
     ],
   },
 ];
+
+// 社会科学は単独の分野にしない。社会・文化の話題は、上のどれかの分野とつながる場合だけ扱う
+export const SCOPE_RULE = `分類は上の4分野だけ。社会・文化・経済・歴史・地政学などの話題は、能動的推論・数理物理・計算理論・神経科学のどれかと実際につながる内容だけを、その分野に入れる。どの分野ともつながらない純粋な社会科学の内容は扱わない。`;
+
+// 解釈が中心の下位分野のID
+export const INTERPRET_IDS = FIELDS.flatMap((f) => f.subfields.filter((s) => s.mode === 'interpret').map((s) => s.id));
 
 export function findSubfield(fieldId, subfieldId) {
   const field = FIELDS.find((f) => f.id === fieldId);

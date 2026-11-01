@@ -1,6 +1,6 @@
 // 会話から知識カードを作る共通部分。学びの対話（generateKnowledgeCards）と
 // 全画面共通のAIチャット（generateAssistantCards）の両方で使う
-import { findSubfield, taxonomyList, INTERPRET_RULES } from './taxonomy.ts';
+import { findSubfield, taxonomyList, INTERPRET_RULES, INTERPRET_IDS, SCOPE_RULE } from './taxonomy.ts';
 
 export const CARD_SCHEMA = {
   type: 'object',
@@ -35,8 +35,9 @@ export function cardFieldsInstruction() {
 - open_question: 次に考えたい小さな問いを1つ
 - field / subfield: 次の分類から最も近いものをIDで選ぶ。どれにも当てはまらなければ両方とも空文字。
 ${taxonomyList()}
+${SCOPE_RULE} そうした内容しかない場合はカードにしない。
 - domain: subfield を選んだときはその日本語名。選ばなかったときは最も近い分野名
-- subfield が neuro-case / thought-neuro / hidden-suffering のときは、verifiable に確かめられること、interpretation に解釈・仮説を分けて書く。それ以外は両方とも空文字。
+- subfield が ${INTERPRET_IDS.join(' / ')} のときは、verifiable に確かめられること、interpretation に解釈・仮説を分けて書く。それ以外は両方とも空文字。
 ${INTERPRET_RULES}
 - 正しい知識だけをカードにする。会話の中の誤り（ユーザーの思い違いやAIの間違い）はそのままカードにしない。正しい内容に直せるなら直したものをカードにする。
 - 議論が分かれる内容や仮説は、事実として書かない。解釈が中心の分野なら interpretation に分けて書き、それ以外の分野ではカードにしない。

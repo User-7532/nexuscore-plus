@@ -12,6 +12,7 @@ export const FIELDS = [
       { id: 'predictive-coding', label: '生成モデルと予測符号化', mode: 'fact' },
       { id: 'action-selection', label: '期待自由エネルギーと行為選択', mode: 'fact' },
       { id: 'markov-blanket', label: 'マルコフブランケット', mode: 'fact' },
+      { id: 'social-inference', label: '集団・社会と能動的推論', mode: 'interpret' },
     ],
   },
   {
@@ -48,19 +49,9 @@ export const FIELDS = [
       { id: 'cellular', label: '細胞・シナプス生理', mode: 'fact' },
       { id: 'computational-neuro', label: '計算論的神経科学', mode: 'fact' },
       { id: 'consciousness', label: '意識と知覚の神経基盤', mode: 'fact' },
-    ],
-  },
-  {
-    id: 'social',
-    label: '社会科学',
-    subfields: [
-      { id: 'neuro-case', label: '神経科学で読むケーススタディ', mode: 'interpret' },
+      { id: 'neuro-case', label: '宗教・文化的実践と神経科学', mode: 'interpret' },
       { id: 'thought-neuro', label: '思想と神経科学', mode: 'interpret' },
-      { id: 'hidden-suffering', label: '見えにくい苦しみ', mode: 'interpret' },
-      { id: 'geopolitics', label: '地政学', mode: 'fact' },
-      { id: 'geo-history', label: '地理・歴史', mode: 'fact' },
-      { id: 'business-econ', label: 'ビジネス・経済', mode: 'fact' },
-      { id: 'assets', label: '資産形成・金融リテラシー', mode: 'fact' },
+      { id: 'hidden-suffering', label: '見えにくい苦しみの神経科学', mode: 'interpret' },
     ],
   },
 ];
