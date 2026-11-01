@@ -59,7 +59,7 @@ export default function PracticeQuestion({ question, card, onResult, onSkip }) {
                         : 'mx-0.5 rounded-md bg-secondary px-7 shadow-[inset_0_-1.5px_0_hsl(var(--primary)/0.45)]'
                     }
                   >
-                    {revealed ? question.answer : ' '}
+                    {revealed ? question.answer : '\u00a0'}
                   </button>
                 )}
               </span>
