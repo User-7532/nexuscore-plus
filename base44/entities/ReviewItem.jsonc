@@ -1,0 +1,52 @@
+{
+  "name": "ReviewItem",
+  "type": "object",
+  "properties": {
+    "card_id": {
+      "type": "string",
+      "description": "\u5fa9\u7fd2\u3059\u308b\u77e5\u8b58\u30ab\u30fc\u30c9"
+    },
+    "title": {
+      "type": "string"
+    },
+    "domain": {
+      "type": "string"
+    },
+    "due_date": {
+      "type": "string",
+      "description": "YYYY-MM-DD"
+    },
+    "interval_days": {
+      "type": "number"
+    },
+    "streak": {
+      "type": "number",
+      "description": "\u9023\u7d9a\u6b63\u89e3\u6570"
+    },
+    "last_result": {
+      "type": "string",
+      "enum": [
+        "correct",
+        "wrong"
+      ]
+    }
+  },
+  "required": [
+    "card_id",
+    "due_date"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}
