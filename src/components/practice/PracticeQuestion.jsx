@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Check, Loader2, X } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { cardPlace } from '@/lib/taxonomy';
 
 // 練習問題1問。穴埋めは自己採点、記述はAIが判定する。
 // 穴埋めの空所には、隠しているあいだ答えの文字を置かない（切り替え時に一瞬見えるのを防ぐ）
@@ -12,6 +13,8 @@ export default function PracticeQuestion({ question, card, onResult, onSkip }) {
   const [error, setError] = useState('');
 
   const written = question.kind === 'written';
+  // 解釈が中心の問いは、一つの正解ではなく観点で判定する
+  const rubric = question.assessment === 'rubric' ? question.rubric || [] : [];
   const parts = String(question.text || '').split('___');
 
   const judge = async () => {
@@ -34,15 +37,22 @@ export default function PracticeQuestion({ question, card, onResult, onSkip }) {
       <div className="rounded-[22px] border border-border/70 bg-card p-6">
         <div className="flex items-center justify-between gap-3">
           <p className="text-[10.5px] tracking-wide text-primary/80">
-            {card.domain || '概念'} ・ {card.title}
+            {cardPlace(card)} ・ {card.title}
           </p>
-          <span className="rounded-full bg-secondary px-2.5 py-0.5 text-[10px] text-muted-foreground">
-            {written ? '記述' : '穴埋め'}
+          <span className="shrink-0 rounded-full bg-secondary px-2.5 py-0.5 text-[10px] text-muted-foreground">
+            {written ? (rubric.length ? '記述・観点で判定' : '記述') : '穴埋め'}
           </span>
         </div>
 
         {written ? (
-          <p className="mt-4 whitespace-pre-wrap text-[14px] leading-[2]">{question.text}</p>
+          <>
+            <p className="mt-4 whitespace-pre-wrap text-[14px] leading-[2]">{question.text}</p>
+            {rubric.length > 0 && !verdict && (
+              <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
+                一つの正解はありません。確かめられることと、あなたの解釈を分けて書くと伝わりやすくなります。
+              </p>
+            )}
+          </>
         ) : (
           <p className="mt-4 text-[14px] leading-[2.1]">
             {parts.map((part, i) => (
@@ -77,11 +87,27 @@ export default function PracticeQuestion({ question, card, onResult, onSkip }) {
           <div className="mt-5 space-y-3">
             <p className={`flex items-center gap-1.5 text-[12.5px] ${verdict.correct ? 'text-primary' : 'text-destructive'}`}>
               {verdict.correct ? <Check className="h-4 w-4" strokeWidth={1.8} /> : <X className="h-4 w-4" strokeWidth={1.8} />}
-              {verdict.correct ? '伝わっています' : 'もう一歩です'}
+              {rubric.length
+                ? verdict.correct
+                  ? '観点を押さえられています'
+                  : '足りない観点があります'
+                : verdict.correct
+                  ? '伝わっています'
+                  : 'もう一歩です'}
             </p>
             <p className="text-[12.5px] leading-[1.9]">{verdict.feedback}</p>
+            {rubric.length > 0 && (
+              <div className="rounded-[18px] border border-border/60 px-4 py-3.5">
+                <p className="text-[10.5px] text-muted-foreground">見ていた観点</p>
+                <ul className="mt-1.5 space-y-1">
+                  {rubric.map((r) => (
+                    <li key={r} className="text-[12px] leading-[1.8]">・{r}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <div className="rounded-[18px] bg-secondary/60 px-4 py-3.5">
-              <p className="text-[10.5px] text-muted-foreground">模範解答</p>
+              <p className="text-[10.5px] text-muted-foreground">{rubric.length ? '解答の一例' : '模範解答'}</p>
               <p className="mt-1 whitespace-pre-wrap text-[12.5px] leading-[1.9]">{question.model_answer || question.answer}</p>
               {question.explanation && (
                 <p className="mt-2 text-[11.5px] leading-[1.9] text-muted-foreground">{question.explanation}</p>
