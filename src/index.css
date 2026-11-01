@@ -89,9 +89,9 @@
   }
 }
 
-/* コードエディタ。見た目の設定にかかわらず暗色で表示する */
-@layer components {
-  .code-surface {
+/* コードエディタ。見た目の設定にかかわらず暗色で表示する。
+   tk-* は実行時に組み立てるクラス名なので、Tailwind のレイヤーの外に置いて削られないようにする */
+.code-surface {
     background: #17140f;
     border-color: #2d261d;
     color: #ece3d6;
