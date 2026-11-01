@@ -1,0 +1,40 @@
+{
+  "name": "AssistantMessage",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "user",
+        "assistant"
+      ],
+      "description": "\u767a\u8a00\u8005"
+    },
+    "content": {
+      "type": "string",
+      "description": "\u767a\u8a00\u5185\u5bb9"
+    },
+    "page": {
+      "type": "string",
+      "description": "\u8a71\u3057\u304b\u3051\u305f\u3068\u304d\u306b\u958b\u3044\u3066\u3044\u305f\u753b\u9762"
+    }
+  },
+  "required": [
+    "role",
+    "content"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}
