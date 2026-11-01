@@ -20,7 +20,12 @@ export default async function (req) {
     }
 
     const transcript = recent
-      .map((m) => `${m.role === 'user' ? 'ユーザー' : 'AI'}${m.page ? `（${m.page}）` : ''}: ${String(m.content || '').slice(0, 1500)}`)
+      .map(
+        (m) =>
+          `${m.role === 'user' ? 'ユーザー' : 'AI'}${m.page ? `（${m.page}）` : ''}: ${
+            m.quote ? `［引用「${String(m.quote).slice(0, 300)}」について］` : ''
+          }${String(m.content || '').slice(0, 1500)}`
+      )
       .join('\n\n');
 
     const prompt = `あなたは学習者の会話から知識の構造を取り出す編集者です。

@@ -14,6 +14,10 @@
       "type": "string",
       "description": "発言内容"
     },
+    "quote": {
+      "type": "string",
+      "description": "画面で選んで質問した文章（引用）"
+    },
     "page": {
       "type": "string",
       "description": "話しかけたときに開いていた画面"

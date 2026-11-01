@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { GripHorizontal, Loader2, Maximize2, Minimize2, Search, Send, X } from 'lucide-react';
+import { GripHorizontal, Loader2, Maximize2, Minimize2, Quote, Search, Send, X } from 'lucide-react';
 import MessageSearch from '@/components/assistant/MessageSearch';
 
 const CHIPS = [
@@ -8,6 +8,8 @@ const CHIPS = [
   'ここで出てきた概念を、別の分野とつなげて',
   'まだ曖昧なカードを一緒に整理したい',
 ];
+// 文章を選んで聞くときは、その部分についての聞き方だけを出す
+const CHIPS_QUOTE = ['どういう意味？', '詳しく説明して', 'なぜ？'];
 
 export default function AssistantPanel({
   messages,
@@ -17,6 +19,8 @@ export default function AssistantPanel({
   onLoadFrom,
   expanded,
   onToggleExpand,
+  quote = '',
+  onClearQuote,
   dragProps,
   dragging,
 }) {
@@ -45,10 +49,18 @@ export default function AssistantPanel({
     bottomRef.current?.scrollIntoView({ block: 'end', behavior: 'smooth' });
   }, [messages, busy]);
 
+  // 開いたとき・引用が入ったときに、すぐ入力できるようキャレットを置く
   useEffect(() => {
-    const timer = setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 0);
+    // クリック処理のあとで確実にフォーカスが残るよう、次の描画タイミングで置く
+    const timer = setTimeout(() => {
+      const el = inputRef.current;
+      if (!el) return;
+      el.focus({ preventScroll: true });
+      const end = el.value.length;
+      el.setSelectionRange(end, end);
+    }, 0);
     return () => clearTimeout(timer);
-  }, []);
+  }, [quote]);
 
   // 検索候補を閉じてから、選んだ発言の位置までスクロールする（目印は付けない）
   const jumpTo = (m) => {
@@ -78,6 +90,7 @@ export default function AssistantPanel({
   };
 
   const stop = (e) => e.stopPropagation();
+  const chips = quote ? CHIPS_QUOTE : CHIPS;
 
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-[24px] border border-border/70 bg-card shadow-[0_18px_50px_-20px_rgba(40,34,28,0.45)]">
@@ -153,6 +166,11 @@ export default function AssistantPanel({
                   m.role === 'user' ? 'bg-primary/10' : 'bg-secondary/60'
                 }`}
               >
+                {m.quote && (
+                  <p className="mb-1.5 border-l-2 border-primary/40 pl-2 text-[11px] leading-relaxed text-muted-foreground">
+                    {m.quote}
+                  </p>
+                )}
                 {m.content}
               </div>
             </div>
@@ -167,8 +185,22 @@ export default function AssistantPanel({
       </div>
 
       <div className="border-t border-border/60 px-3 py-3">
+        {quote && (
+          <div className="mb-2 flex items-start gap-1.5 rounded-xl border border-primary/25 bg-primary/5 px-2.5 py-1.5">
+            <Quote className="mt-0.5 h-3 w-3 shrink-0 text-primary/70" strokeWidth={1.7} />
+            <p className="max-h-16 flex-1 overflow-y-auto text-[11px] leading-relaxed text-muted-foreground">{quote}</p>
+            <button
+              type="button"
+              onClick={onClearQuote}
+              className="shrink-0 rounded-full p-0.5 text-muted-foreground transition-colors hover:text-foreground"
+              title="引用を外す"
+            >
+              <X className="h-3 w-3" strokeWidth={1.7} />
+            </button>
+          </div>
+        )}
         <div className="mb-2 flex gap-1.5 overflow-x-auto pb-0.5">
-          {CHIPS.map((c) => (
+          {chips.map((c) => (
             <button
               key={c}
               type="button"
@@ -193,7 +225,7 @@ export default function AssistantPanel({
             }}
             rows={expanded ? 2 : 1}
             maxLength={1500}
-            placeholder="何でも話しかけてください"
+            placeholder={quote ? 'この部分について、どう聞きますか？' : '何でも話しかけてください'}
             className="max-h-32 min-h-10 flex-1 resize-none rounded-2xl border border-border/70 bg-background px-3.5 py-2.5 text-[12.5px] leading-relaxed outline-none focus:border-primary/40"
           />
           <button

@@ -16,6 +16,8 @@ export default async function (req) {
     const page = String(body.page || '').slice(0, 60);
     const path = String(body.path || '').slice(0, 120);
     const pageContext = String(body.context || '').trim().slice(0, 1800);
+    // 画面で選んだ文章（この部分についての質問）
+    const quote = String(body.quote || '').replace(/\s+/g, ' ').trim().slice(0, 500);
     if (!message) return Response.json({ error: 'メッセージを入力してください' }, { status: 400 });
 
     const today = new Date().toISOString().slice(0, 10);
@@ -61,7 +63,7 @@ export default async function (req) {
     const talk = (history.items || [])
       .slice()
       .reverse()
-      .map((m) => `${m.role === 'user' ? 'ユーザー' : '伴走者'}: ${String(m.content).slice(0, 600)}`)
+      .map((m) => `${m.role === 'user' ? 'ユーザー' : '伴走者'}: ${m.quote ? `（引用「${String(m.quote).slice(0, 200)}」について）` : ''}${String(m.content).slice(0, 600)}`)
       .join('\n');
 
     const prompt = `${TUTOR_IDENTITY}
@@ -97,6 +99,9 @@ ${pageContext || '（取得できませんでした）'}
 [直近の会話（古い順）]
 ${talk || '（はじめての会話）'}
 
+[今回引用された本文（この部分についての質問）]
+${quote ? `「${quote}」` : '（引用なし）'}
+
 [今回の発話]
 ユーザー: ${message}`;
 
@@ -104,7 +109,7 @@ ${talk || '（はじめての会話）'}
     const text = String(reply || '').trim() || 'うまく言葉にできませんでした。もう一度話しかけてください。';
 
     await base44.entities.AssistantMessage.bulkCreate([
-      { role: 'user', content: message, page },
+      { role: 'user', content: message, quote, page },
       { role: 'assistant', content: text, page },
     ]);
 

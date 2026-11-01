@@ -2,6 +2,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Sun, MessagesSquare, Layers, Hammer, Repeat, Code2, Settings as SettingsIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import AssistantChat from '@/components/assistant/AssistantChat';
+import SelectionAsk from '@/components/assistant/SelectionAsk';
 
 // short はスマートフォンの下部ナビ用の短い名前
 const navItems = [
@@ -101,6 +102,7 @@ export default function Layout() {
       </div>
 
       <AssistantChat />
+      <SelectionAsk />
     </div>
   );
 }
