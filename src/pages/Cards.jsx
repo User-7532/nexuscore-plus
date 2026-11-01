@@ -288,6 +288,10 @@ export default function Cards() {
                   この概念を問題で確かめる
                 </Link>
 
+                {selected.source === 'assistant' && (
+                  <p className="text-[12px] text-muted-foreground">AIチャットでの会話から生まれたカードです。</p>
+                )}
+
                 {selected.source_conversation_id && (
                   <Link
                     to={`/tutor?c=${selected.source_conversation_id}`}

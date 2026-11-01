@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { TUTOR_IDENTITY } from '../../shared/tutorContext.ts';
 import { FIELDS, INTERPRET_RULES } from '../../shared/taxonomy.ts';
+import { userTurnsSinceMark } from '../../shared/assistantCards.ts';
 
 const fieldName = (id) => FIELDS.find((f) => f.id === id)?.label || '未分類';
 
@@ -106,7 +107,10 @@ ${talk || '（はじめての会話）'}
       { role: 'assistant', content: text, page },
     ]);
 
-    return Response.json({ reply: text });
+    // 前回カードにしてから3回以上話しかけていたら、カードづくりを促す
+    const turns = await userTurnsSinceMark(base44).catch(() => 0);
+
+    return Response.json({ reply: text, suggestCards: turns >= 3 });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

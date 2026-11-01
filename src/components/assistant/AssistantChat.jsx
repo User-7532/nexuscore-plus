@@ -73,6 +73,22 @@ export default function AssistantChat() {
     }
   };
 
+  // 学びの対話と同じく、3往復ごとに会話から知識カードを育てる。返事の表示は待たせない
+  const makeCards = async () => {
+    try {
+      const res = await base44.functions.invoke('generateAssistantCards', {});
+      const count = res.data?.created?.length || 0;
+      if (count) {
+        toast({
+          title: `知識カードを${count}枚 育てました`,
+          description: 'AIチャットでの会話から作りました。「知識カード」から見られます。',
+        });
+      }
+    } catch {
+      // カードづくりに失敗しても会話は続けられるので、知らせない
+    }
+  };
+
   const send = async (raw) => {
     const text = String(raw || '').trim();
     if (!text || busy) return;
@@ -87,6 +103,7 @@ export default function AssistantChat() {
       });
       if (res.data?.error) throw new Error(res.data.error);
       setMessages((prev) => [...(prev || []), { id: `a-${Date.now()}`, role: 'assistant', content: res.data.reply }]);
+      if (res.data?.suggestCards) makeCards();
     } catch (e) {
       toast({ title: 'うまく答えられませんでした', description: e.message, variant: 'destructive' });
     } finally {
