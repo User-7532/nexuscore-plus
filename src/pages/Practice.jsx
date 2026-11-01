@@ -147,18 +147,12 @@ export default function Practice() {
       ) : (
         <>
           <div className="space-y-2">
-            {domains.length > 1 && (
-              <div className="flex flex-wrap gap-1.5">
-                <Chip active={domain === 'all'} onClick={() => setDomain('all')}>
-                  すべて
-                </Chip>
-                {domains.map((d) => (
-                  <Chip key={d} active={domain === d} onClick={() => setDomain(d)}>
-                    {d}
-                  </Chip>
-                ))}
-              </div>
-            )}
+            <FieldPicker
+              field={place.field}
+              subfield={place.subfield}
+              counts={counts}
+              onChange={(field, subfield) => setPlace({ field, subfield })}
+            />
             <div className="flex flex-wrap items-center gap-1.5">
               <Chip active={light} onClick={() => setLight((v) => !v)} title="急ぐときは記述を外して穴埋めだけにします">
                 記述を外す
