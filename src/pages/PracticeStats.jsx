@@ -121,17 +121,32 @@ export default function PracticeStats() {
         {byDomain.length === 0 ? (
           <p className="text-[12.5px] text-muted-foreground">練習を始めると、ここに分野ごとの様子が並びます。</p>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-5">
             {byDomain.map((d) => (
-              <div key={d.name} className="space-y-1.5">
-                <div className="flex items-baseline justify-between gap-3 text-[12.5px]">
-                  <span>{d.name}</span>
-                  <span className="text-[11px] text-muted-foreground">
-                    {d.rate}% ・ {d.total}問
-                  </span>
+              <div key={d.id} className="space-y-2">
+                <div className="space-y-1.5">
+                  <div className="flex items-baseline justify-between gap-3 text-[13px]">
+                    <span>{d.name}</span>
+                    <span className="text-[11px] text-muted-foreground">
+                      {d.rate}% ・ {d.total}問
+                    </span>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
+                    <div className="h-full rounded-full bg-primary/70" style={{ width: `${d.rate}%` }} />
+                  </div>
                 </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
-                  <div className="h-full rounded-full bg-primary/70" style={{ width: `${d.rate}%` }} />
+                <div className="space-y-1.5 border-l border-border/70 pl-4">
+                  {d.subs.map((s) => (
+                    <div key={s.name} className="flex items-center gap-3 text-[11.5px]">
+                      <span className="w-40 shrink-0 truncate text-muted-foreground sm:w-56">{s.name}</span>
+                      <span className="h-1 flex-1 overflow-hidden rounded-full bg-secondary">
+                        <span className="block h-full rounded-full bg-primary/50" style={{ width: `${s.rate}%` }} />
+                      </span>
+                      <span className="w-16 shrink-0 text-right text-[10.5px] text-muted-foreground">
+                        {s.rate}%・{s.total}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}
