@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { MessageCircle } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
@@ -73,8 +73,15 @@ export default function AssistantChat() {
     }
   };
 
-  // 学びの対話と同じく、3往復ごとに会話から知識カードを育てる。返事の表示は待たせない
+  // 会話に出てきた知識を、その都度カードにする。返事の表示は待たせない
+  // 続けて送ったときは、前のカードづくりが終わってからもう一度だけ走らせる
+  const cardJob = useRef({ running: false, again: false });
   const makeCards = async () => {
+    if (cardJob.current.running) {
+      cardJob.current.again = true;
+      return;
+    }
+    cardJob.current.running = true;
     try {
       const res = await base44.functions.invoke('generateAssistantCards', {});
       const count = res.data?.created?.length || 0;
@@ -86,6 +93,12 @@ export default function AssistantChat() {
       }
     } catch {
       // カードづくりに失敗しても会話は続けられるので、知らせない
+    } finally {
+      cardJob.current.running = false;
+      if (cardJob.current.again) {
+        cardJob.current.again = false;
+        makeCards();
+      }
     }
   };
 

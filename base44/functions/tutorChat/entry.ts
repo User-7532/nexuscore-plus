@@ -69,13 +69,11 @@ export default async function (req) {
     }
     await base44.entities.Conversation.update(conversationId, update);
 
-    const userTurns = history.filter((m) => m.role === 'user').length + 1;
-
     return Response.json({
       reply,
       messages: saved,
       messageCount,
-      suggestCards: mode !== 'review' && userTurns % 3 === 0,
+      suggestCards: mode !== 'review',
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

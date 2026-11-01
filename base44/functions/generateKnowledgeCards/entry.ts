@@ -23,20 +23,21 @@ export default async function (req) {
         )
       : null;
 
-    const historyPage = await base44.entities.Message.filter(
-      { conversation_id: conversation.id },
-      { sort: 'created_date', limit: 40 }
-    );
-    const history = historyPage.items || [];
-    if (history.length < 2) {
-      return Response.json({ created: [], reason: '対話がまだ短すぎます' });
+    // 前回カードにした発言より後だけを使う（毎回呼ばれるので、同じ部分を何度もカードにしない）
+    const query = conversation.cards_generated_at
+      ? { conversation_id: conversation.id, created_date: { $gt: conversation.cards_generated_at } }
+      : { conversation_id: conversation.id };
+    const historyPage = await base44.entities.Message.filter(query, { sort: '-created_date', limit: 40 });
+    const history = (historyPage.items || []).slice().reverse();
+    if (!history.some((m) => m.role === 'user')) {
+      return Response.json({ created: [], reason: '新しい対話がありません' });
     }
 
     const prompt = [
       'あなたは学習者の対話から知識の構造を取り出す編集者です。',
       buildStackBlock(stack),
       `[対話]\n${buildTranscript(history)}`,
-      `[タスク]\nこの対話から、相手が実際に手に入れた概念を1〜4枚の知識カードにしてください。\n${cardFieldsInstruction()}`,
+      `[タスク]\nこの対話に出てきた正しい知識を、0〜4枚の知識カードにしてください。知識として残せるものがなければ cards は空の配列にする。\n${cardFieldsInstruction()}`,
     ]
       .filter(Boolean)
       .join('\n\n');
@@ -57,8 +58,9 @@ export default async function (req) {
       stack ? stack.name : ''
     );
 
+    // 次回はここまでの続きから。処理中に届いた発言を飛ばさないよう、今回使った最後の発言の時刻にする
     await base44.entities.Conversation.update(conversation.id, {
-      cards_generated_at: new Date().toISOString(),
+      cards_generated_at: history[history.length - 1].created_date,
     });
 
     if (!created.length) {

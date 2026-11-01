@@ -1,7 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { TUTOR_IDENTITY } from '../../shared/tutorContext.ts';
 import { FIELDS, INTERPRET_RULES } from '../../shared/taxonomy.ts';
-import { userTurnsSinceMark } from '../../shared/assistantCards.ts';
 
 const fieldName = (id) => FIELDS.find((f) => f.id === id)?.label || '未分類';
 
@@ -73,7 +72,9 @@ export default async function (req) {
 - 画面や記録に出ていないことは断定しない。存在しないボタンや画面を作らない。
 - コーディング問題を解いている画面では、完成コードや解法そのものは出さず、考え方の方向づけにとどめる。
 - 確立した事実と、解釈・仮説・未解決の議論を分けて話す。
-- 見出し記号やアスタリスクは使わない。目安は2〜8文。
+- 簡潔かつわかりやすく、必要な詳細は省かない。長さは内容に合わせる。
+- 最後に問いかけや次の提案を付けない。答え終わったらそこで終える。
+- 見出し記号やアスタリスクは使わない。
 ${INTERPRET_RULES}
 
 [本人]
@@ -107,10 +108,8 @@ ${talk || '（はじめての会話）'}
       { role: 'assistant', content: text, page },
     ]);
 
-    // 前回カードにしてから3回以上話しかけていたら、カードづくりを促す
-    const turns = await userTurnsSinceMark(base44).catch(() => 0);
-
-    return Response.json({ reply: text, suggestCards: turns >= 3 });
+    // 毎回の会話をカードにする（残すべき知識がなければ作られない）
+    return Response.json({ reply: text, suggestCards: true });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

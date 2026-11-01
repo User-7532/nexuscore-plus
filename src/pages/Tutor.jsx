@@ -98,6 +98,34 @@ export default function Tutor() {
     await loadConversations();
   };
 
+  // 会話に出てきた知識を、その都度カードにする。返事は待たせない
+  const cardJob = useRef({ running: false, again: false });
+  const makeCards = async (conversationId) => {
+    if (cardJob.current.running) {
+      cardJob.current.again = true;
+      return;
+    }
+    cardJob.current.running = true;
+    try {
+      const cardRes = await base44.functions.invoke('generateKnowledgeCards', { conversationId });
+      const count = cardRes.data?.created?.length || 0;
+      if (count) {
+        toast({
+          title: `知識カードを${count}枚 育てました`,
+          description: '「知識カード」から、つながりと一緒に見られます。',
+        });
+      }
+    } catch {
+      // カードづくりに失敗しても対話は続けられるので、知らせない
+    } finally {
+      cardJob.current.running = false;
+      if (cardJob.current.again) {
+        cardJob.current.again = false;
+        makeCards(conversationId);
+      }
+    }
+  };
+
   const send = async () => {
     const text = input.trim();
     if (!text || sending || !activeId) return;
@@ -113,16 +141,7 @@ export default function Tutor() {
       setMessages(page.items || []);
       await loadConversations();
 
-      if (res.data?.suggestCards) {
-        const cardRes = await base44.functions.invoke('generateKnowledgeCards', { conversationId: activeId });
-        const count = cardRes.data?.created?.length || 0;
-        if (count) {
-          toast({
-            title: `知識カードを${count}枚 育てました`,
-            description: '「知識カード」から、つながりと一緒に見られます。',
-          });
-        }
-      }
+      if (res.data?.suggestCards) makeCards(activeId);
     } catch (error) {
       setMessages((prev) => prev.filter((m) => m.id !== 'temp'));
       setInput(text);
@@ -142,7 +161,7 @@ export default function Tutor() {
         <div className="space-y-1.5">
           <h1 className="text-[22px] leading-relaxed">学びの対話</h1>
           <p className="text-[12.5px] text-muted-foreground">
-            考えていることをそのまま置いていってください。3往復ごとに、知識カードが自動で育ちます。
+            考えていることをそのまま置いていってください。対話に出てきた知識は、その都度カードになります。
           </p>
         </div>
         <Button

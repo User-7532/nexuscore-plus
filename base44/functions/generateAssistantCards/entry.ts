@@ -15,8 +15,8 @@ export default async function (req) {
     const page = await base44.entities.AssistantMessage.filter(query, { sort: '-created_date', limit: 40 });
     const recent = (page.items || []).slice().reverse();
 
-    if (recent.filter((m) => m.role === 'user').length < 2) {
-      return Response.json({ created: [], reason: '会話がまだ短すぎます' });
+    if (!recent.some((m) => m.role === 'user')) {
+      return Response.json({ created: [], reason: '新しい会話がありません' });
     }
 
     const transcript = recent
@@ -30,8 +30,8 @@ export default async function (req) {
 ${transcript}
 
 [タスク]
-この会話の中で、相手が新しく理解した・考えを深めた概念を0〜4枚の知識カードにしてください。
-- アプリの使い方、予定の相談、コーディング問題の答え合わせだけの会話など、学びとして残す概念がなければ cards は空の配列にする。無理に作らない。
+この会話に出てきた正しい知識を、0〜4枚の知識カードにしてください。知識として残せるものは1往復だけの会話でもカードにしてよい。
+- アプリの使い方、予定の相談、あいさつなど、知識として残すものがなければ cards は空の配列にする。
 - コーディング問題の解法そのものはカードにしない。出てきた考え方や概念だけを扱う。
 ${cardFieldsInstruction()}`;
 
