@@ -1,37 +1,37 @@
 {
   "name": "AssistantMessage",
-  "type": "object",
   "properties": {
+    "cards_checked": {
+      "default": false,
+      "description": "\u3053\u3053\u307e\u3067\u306e\u4f1a\u8a71\u3092\u77e5\u8b58\u30ab\u30fc\u30c9\u306b\u3057\u305f\u3068\u304d\u306e\u5370",
+      "type": "boolean"
+    },
+    "content": {
+      "description": "\u767a\u8a00\u5185\u5bb9",
+      "type": "string"
+    },
+    "page": {
+      "description": "\u8a71\u3057\u304b\u3051\u305f\u3068\u304d\u306b\u958b\u3044\u3066\u3044\u305f\u753b\u9762",
+      "type": "string"
+    },
+    "quote": {
+      "description": "\u753b\u9762\u3067\u9078\u3093\u3067\u8cea\u554f\u3057\u305f\u6587\u7ae0\uff08\u5f15\u7528\uff09",
+      "type": "string"
+    },
     "role": {
-      "type": "string",
+      "description": "\u767a\u8a00\u8005",
       "enum": [
         "user",
         "assistant"
       ],
-      "description": "発言者"
-    },
-    "content": {
-      "type": "string",
-      "description": "発言内容"
-    },
-    "quote": {
-      "type": "string",
-      "description": "画面で選んで質問した文章（引用）"
-    },
-    "page": {
-      "type": "string",
-      "description": "話しかけたときに開いていた画面"
-    },
-    "cards_checked": {
-      "type": "boolean",
-      "default": false,
-      "description": "ここまでの会話を知識カードにしたときの印"
+      "type": "string"
     }
   },
   "required": [
     "role",
     "content"
   ],
+  "type": "object",
   "rls": {
     "read": {
       "created_by_id": "{{user.id}}"
