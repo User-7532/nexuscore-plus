@@ -1,62 +1,57 @@
-# Base44 Project
+# NexusCore+
 
-Use this repository to run and edit the app locally, then publish changes back through Base44.
+学びと制作を往復するための静かな環境「NexusCore（Attractor）」に、
+コーディング練習アプリ「CodeMaster AI」の学習機能を組み合わせた版です。
 
-Any change pushed to the repo will also be reflected in the Base44 Builder.
+AIとの対話から生まれた **知識カード** を、穴埋めと記述の **練習問題** で確かめ、
+忘れかけたころに **復習** として出し直し、その積み重ねを **統計** で眺められるようにしています。
 
-## Prerequisites
+## 機能
 
-1. Clone the repository using the project's Git URL.
-2. Navigate to the project directory.
-3. Install dependencies: `npm install`.
-4. Install the Base44 CLI: `npm install -g base44@latest`.
-5. Install [Deno](https://docs.deno.com/runtime/getting_started/installation/) — the local Base44 backend runs on it.
+| 画面 | 内容 | 由来 |
+| --- | --- | --- |
+| 今日 | 今日の学びの糸口、進行中のプロジェクト、復習の残り枚数 | NexusCore（復習の表示を追加） |
+| 学びの対話 | 知識スタックを土台にしたAIチューター。学び / 実装の伴走 / コードの振り返りの3モード | NexusCore |
+| 知識カード | 対話から自動で生まれる概念カード。共通する概念どうしが自動でつながる | NexusCore |
+| 練習と復習 | カードから作った穴埋め・記述の問題。記述はAIが採点。間隔反復で出し直す | CodeMaster AI から移植 |
+| 学習の統計 | 分野ごとの言えた割合、直近14日の推移、自分でつけた理解度の分布 | CodeMaster AI から移植 |
+| プロジェクト | 小さな実装の管理、AIによるコードの振り返り、GitHubへの書き出し | NexusCore |
+| 設定 | 目的・焦点・知識スタックに加え、背景のトーン・アクセント色・書体の切り替え | NexusCore（見た目の設定を追加） |
 
-Run `base44 --help` (or see the [CLI reference](https://docs.base44.com/developers/references/cli/commands/introduction)) for the full command surface.
+## 設計で気をつけたこと
 
-## Run Locally
+- **練習問題はカードから作る**
+  問題を別に用意するのではなく、本人の対話から生まれたカードの内容だけを使って、AIが穴埋め1問と記述1問を作ります。
+  カードを初めて練習するときに作り、以後は保存したものを使います（`base44/functions/generatePractice`）。
+- **答えが問題文に出ないようにする**
+  答えの語句が問題文に含まれていないかを保存前に機械的に確かめ、含まれていれば捨てます。
+- **間隔反復**
+  言えたら次までの間を 1日・3日・7日・14日・30日・60日と伸ばし、出てこなければ翌日に戻します（`src/lib/srs.js`）。
+- **見た目の設定はブラウザにだけ保存**
+  CSS変数を差し替えるだけで全画面に反映されます。データベースには保存しません（`src/lib/appearance.js`）。
+- **データのアクセス制限**
+  元のアプリはログインなしで開け、データにも制限がありませんでした。この版では画面をログイン必須にし、
+  すべてのデータに作成した本人だけが読み書きできる行レベルのアクセス制限（RLS）をかけています（`base44/entities/*.jsonc`）。
 
-Three commands, from the project root:
+## 技術構成
+
+- **フロントエンド**: React + Vite、Tailwind CSS、shadcn/ui、Framer Motion、Recharts
+- **バックエンド / BaaS**: [Base44](https://base44.com)（認証、データベース、サーバーレス関数、LLM連携）
+- **サーバーレス関数**（`base44/functions/`）
+  - `tutorChat` / `generateKnowledgeCards` / `reviewProjectCode` / `exportProjectToGitHub`（NexusCore）
+  - `generatePractice` / `judgePractice`（追加）
+
+## 開発について
+
+Base44 の AI ビルダーで作った NexusCore に、Claude を使って CodeMaster AI の学習機能を移植しました。
+移植では、画面の雰囲気（生成りの背景・明朝体の見出し・やわらかい言葉づかい）を NexusCore 側に合わせて作り直しています。
+
+## ローカルで動かす
 
 ```bash
-base44 login   # one-time per machine
-base44 link    # one-time per clone
-base44 dev     # local backend + frontend together
+npm install
+npm install -g base44@latest
+base44 login   # 初回のみ
+base44 link    # クローンごとに1回
+base44 dev     # ローカルのバックエンドとフロントエンドを同時に起動
 ```
-
-Open the frontend URL that `base44 dev` prints (typically `http://localhost:5173`).
-
-Notes:
-
-- **Every fresh clone needs `base44 link`.** It writes `base44/.app.jsonc` (the app-id pointer), which is deliberately gitignored. Your app id is in the Builder URL (`app.base44.com/apps/<id>/...`); `base44 link --help` shows the non-interactive flags.
-- **`base44 dev` runs the frontend for you** (via `site.serveCommand` in this repo's `base44/config.jsonc`) — never run `npm run dev` yourself: alone it serves a UI with no backend behind it (`[base44] Proxy not enabled`, every `/api` call fails), and alongside `base44 dev` the second Vite silently takes the next port and you end up looking at the wrong one.
-- **The app must be published at least once for the UI to load under `base44 dev`.** The frontend boots by fetching app settings from the hosted app; before the first publish that fails and every page redirects to login. The local API works regardless.
-- Entities, functions, and auth run locally — entity data is **in-memory only**, wiped when `base44 dev` restarts. Everything else (Core integrations, OAuth login) is forwarded to your deployed app. Full breakdown: [Local development overview](https://docs.base44.com/developers/backend/overview/local-dev/local-development-overview).
-
-## Frontend Only, Hosted Backend
-
-To work on just the frontend against your app's live hosted backend:
-
-```bash
-base44 dev --remote
-```
-
-⚠️ In this mode writes go to your app's **production data** — plain `base44 dev` keeps everything local.
-
-## Publish Your Changes
-
-After pushing your changes to git, open the Base44 dashboard and publish the app:
-
-```bash
-base44 dashboard open
-```
-
-This repo syncs to Base44 through git, so publish from the dashboard rather than `base44 deploy` — a CLI deploy ships your local tree directly, bypassing the sync, and the deployed state silently diverges from the repo.
-
-## Docs & Support
-
-GitHub integration: [https://docs.base44.com/developers/app-code/local-development/github](https://docs.base44.com/developers/app-code/local-development/github)
-
-Local development: [https://docs.base44.com/developers/backend/overview/local-dev/local-development-overview](https://docs.base44.com/developers/backend/overview/local-dev/local-development-overview)
-
-Support: [https://app.base44.com/support](https://app.base44.com/support)
