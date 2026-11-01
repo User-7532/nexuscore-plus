@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Code2, Feather, Layers, Loader2 } from 'lucide-react';
+import { ArrowRight, Code2, Feather, Layers, Loader2, Repeat } from 'lucide-react';
+import { todayISO } from '@/lib/srs';
 import { base44 } from '@/api/base44Client';
 import { STAGE_LABELS, STAGE_STYLES } from '@/components/project/stages';
 import { cn } from '@/lib/utils';
@@ -26,6 +27,15 @@ export default function Home() {
     recentCards: [],
     counts: { cards: 0, conversations: 0, projects: 0 },
   });
+
+  const [dueCount, setDueCount] = useState(0);
+
+  // 今日復習するカードの枚数
+  useEffect(() => {
+    base44.entities.ReviewItem.filter({ due_date: { $lte: todayISO() } }, { limit: 200 })
+      .then((page) => setDueCount((page.items || []).length))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -82,6 +92,21 @@ export default function Home() {
             : '考えていることを言葉にして、小さく作って、振り返る。その往復をここで。'}
         </p>
       </motion.header>
+
+      {dueCount > 0 && (
+        <motion.div variants={fade}>
+          <Link
+            to="/practice/review"
+            className="group flex items-center justify-between gap-4 rounded-[20px] border border-border/70 bg-card px-5 py-4 transition-colors hover:bg-secondary/40"
+          >
+            <span className="flex items-center gap-3">
+              <Repeat className="h-4 w-4 text-primary" strokeWidth={1.7} />
+              <span className="text-[13px]">忘れかけたころのカードが {dueCount} 枚あります</span>
+            </span>
+            <ArrowRight className="h-3.5 w-3.5 text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5" strokeWidth={1.8} />
+          </Link>
+        </motion.div>
+      )}
 
       <div className="grid gap-4 lg:grid-cols-5">
         <motion.section
