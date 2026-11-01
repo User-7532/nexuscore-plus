@@ -67,7 +67,14 @@ export default function Layout() {
 
         <div className="flex min-w-0 flex-1 flex-col">
           <main className="flex-1 px-5 pb-28 pt-8 md:px-10 md:pb-16 md:pt-10">
-            <div key={location.pathname} className="mx-auto w-full max-w-[980px] animate-in fade-in duration-500">
+            <div
+              key={location.pathname}
+              className={cn(
+                'mx-auto w-full animate-in fade-in duration-500',
+                // コードを書く画面は、問題文とエディタを並べるので広めにする
+                location.pathname.startsWith('/code/') ? 'max-w-[1240px]' : 'max-w-[980px]'
+              )}
+            >
               <Outlet />
             </div>
           </main>
@@ -92,6 +99,8 @@ export default function Layout() {
           </nav>
         </div>
       </div>
+
+      <AssistantChat />
     </div>
   );
 }
