@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { buildStackBlock, buildTranscript } from '../../shared/tutorContext.ts';
+import { findSubfield, taxonomyList, INTERPRET_RULES } from '../../shared/taxonomy.ts';
 
 const CARD_SCHEMA = {
   type: 'object',
@@ -14,6 +15,10 @@ const CARD_SCHEMA = {
           key_concepts: { type: 'array', items: { type: 'string' } },
           open_question: { type: 'string' },
           domain: { type: 'string' },
+          field: { type: 'string' },
+          subfield: { type: 'string' },
+          verifiable: { type: 'string' },
+          interpretation: { type: 'string' },
         },
         required: ['title', 'summary', 'key_concepts'],
       },
@@ -75,7 +80,11 @@ export default async function (req) {
 - summary: 相手の言葉づかいに寄せた2〜3文の要約（120字程度）
 - key_concepts: 他のカードとつながるための共通概念タグを2〜4個（短い名詞。日本語）
 - open_question: 次に考えたい小さな問いを1つ
-- domain: 最も近い分野（能動的推論 / 情報理論 / 計算理論 / 神経科学 / 地政学・認識論 など）
+- field / subfield: 次の分類から最も近いものをIDで選ぶ。どれにも当てはまらなければ両方とも空文字。
+${taxonomyList()}
+- domain: subfield を選んだときはその日本語名。選ばなかったときは最も近い分野名
+- subfield が neuro-case / thought-neuro / hidden-suffering のときは、verifiable に確かめられること、interpretation に解釈・仮説を分けて書く。それ以外は両方とも空文字。
+${INTERPRET_RULES}
 対話に実際に出てきた内容だけを使う。教科書的な一般論の要約にはしない。
 日本語で。`,
     ]
@@ -111,12 +120,20 @@ export default async function (req) {
         .filter((item) => sharesConcept(concepts, item.concepts))
         .slice(0, 4)
         .map((item) => item.id);
+      // 存在しない分類IDが返ってきたときは未分類にする
+      const place = findSubfield(String(card.field || ''), String(card.subfield || ''));
+      const interpret = place?.sub.mode === 'interpret';
       return {
         title: card.title,
         summary: card.summary,
         key_concepts: card.key_concepts || [],
         open_question: card.open_question || '',
-        domain: card.domain || (stack ? stack.name : ''),
+        domain: place ? place.sub.label : card.domain || (stack ? stack.name : ''),
+        field: place ? place.field.id : '',
+        subfield: place ? place.sub.id : '',
+        verifiable: interpret ? String(card.verifiable || '') : '',
+        interpretation: interpret ? String(card.interpretation || '') : '',
+        source: 'dialogue',
         stack_id: conversation.stack_id || '',
         source_conversation_id: conversation.id,
         related_card_ids: related,
