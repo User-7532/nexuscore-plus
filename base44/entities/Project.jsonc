@@ -7,11 +7,11 @@
     },
     "one_liner": {
       "type": "string",
-      "description": "\u3072\u3068\u3053\u3068\u3067\u8a00\u3046\u3068\u4f55\u3092\u4f5c\u308b\u304b"
+      "description": "ひとことで言うと何を作るか"
     },
     "motivation": {
       "type": "string",
-      "description": "\u306a\u305c\u4f5c\u308b\u306e\u304b\u3002\u8ab0\u306e\u3069\u3093\u306a\u75db\u307f\u306b\u5411\u304b\u3046\u304b"
+      "description": "なぜ作るのか。誰のどんな痛みに向かうか"
     },
     "stage": {
       "type": "string",
@@ -22,7 +22,7 @@
         "society"
       ],
       "default": "family",
-      "description": "family=\u5bb6\u65cf\u30fb\u8eab\u8fd1\u306a\u8ab2\u984c / mind=\u81ea\u5206\u306e\u7cbe\u795e\u306e\u30cf\u30c3\u30af / community=\u8eab\u8fd1\u306a\u5171\u540c\u4f53 / society=\u793e\u4f1a\u5b9f\u88c5"
+      "description": "family=家族・身近な課題 / mind=自分の精神のハック / community=身近な共同体 / society=社会実装"
     },
     "status": {
       "type": "string",
@@ -36,7 +36,7 @@
     },
     "next_step": {
       "type": "string",
-      "description": "\u6b21\u306b\u3084\u308b\u4e00\u756a\u5c0f\u3055\u306a\u4e00\u6b69"
+      "description": "次にやる一番小さな一歩"
     },
     "steps": {
       "type": "array",
@@ -51,7 +51,7 @@
           }
         }
       },
-      "description": "\u5b9f\u88c5\u306e\u30b9\u30c6\u30c3\u30d7"
+      "description": "実装のステップ"
     },
     "files": {
       "type": "array",
@@ -66,7 +66,7 @@
           }
         }
       },
-      "description": "\u30d7\u30ed\u30b8\u30a7\u30af\u30c8\u306e\u30b3\u30fc\u30c9"
+      "description": "プロジェクトのコード"
     },
     "related_card_ids": {
       "type": "array",
@@ -87,5 +87,19 @@
   },
   "required": [
     "title"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
 }

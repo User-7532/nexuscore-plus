@@ -4,33 +4,33 @@
   "properties": {
     "title": {
       "type": "string",
-      "description": "\u6982\u5ff5\u306e\u540d\u524d"
+      "description": "概念の名前"
     },
     "summary": {
       "type": "string",
-      "description": "\u81ea\u5206\u306e\u8a00\u8449\u306b\u8fd1\u3065\u3051\u305f\u8981\u7d04"
+      "description": "自分の言葉に近づけた要約"
     },
     "key_concepts": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "\u30ab\u30fc\u30c9\u540c\u58eb\u3092\u81ea\u52d5\u3067\u3064\u306a\u3050\u5171\u901a\u6982\u5ff5"
+      "description": "カード同士を自動でつなぐ共通概念"
     },
     "open_question": {
       "type": "string",
-      "description": "\u6b21\u306b\u8003\u3048\u305f\u3044\u5c0f\u3055\u306a\u554f\u3044"
+      "description": "次に考えたい小さな問い"
     },
     "domain": {
       "type": "string",
-      "description": "\u5206\u91ce\u540d"
+      "description": "分野名"
     },
     "stack_id": {
       "type": "string"
     },
     "source_conversation_id": {
       "type": "string",
-      "description": "\u51fa\u5178\u3068\u306a\u3063\u305f\u5bfe\u8a71"
+      "description": "出典となった対話"
     },
     "related_card_ids": {
       "type": "array",
@@ -41,7 +41,7 @@
     "understanding": {
       "type": "number",
       "default": 0,
-      "description": "0=\u3053\u308c\u304b\u3089 / 1=\u308f\u304b\u3089\u306a\u3044\u3068\u3053\u308d\u304c\u3042\u308b / 2=\u3060\u3044\u305f\u3044\u308f\u304b\u308b / 3=\u4eba\u306b\u8aac\u660e\u3067\u304d\u308b"
+      "description": "0=これから / 1=わからないところがある / 2=だいたいわかる / 3=人に説明できる"
     },
     "visit_count": {
       "type": "number",
@@ -55,5 +55,19 @@
   "required": [
     "title",
     "summary"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
 }

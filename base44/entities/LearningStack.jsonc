@@ -4,22 +4,22 @@
   "properties": {
     "name": {
       "type": "string",
-      "description": "\u5206\u91ce\u306e\u540d\u524d\uff08\u4f8b\uff1a\u80fd\u52d5\u7684\u63a8\u8ad6\uff09"
+      "description": "分野の名前（例：能動的推論）"
     },
     "description": {
       "type": "string",
-      "description": "\u3053\u306e\u5206\u91ce\u3092\u5b66\u3076\u7406\u7531\u30fb\u4f4d\u7f6e\u3065\u3051"
+      "description": "この分野を学ぶ理由・位置づけ"
     },
     "focus_concepts": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "\u3053\u306e\u5206\u91ce\u3067\u62bc\u3055\u3048\u305f\u3044\u6982\u5ff5"
+      "description": "この分野で押さえたい概念"
     },
     "accent": {
       "type": "string",
-      "description": "\u8868\u793a\u30c8\u30fc\u30f3\uff08clay / sage / sand / sky / dusk\uff09"
+      "description": "表示トーン（clay / sage / sand / sky / dusk）"
     },
     "sort_order": {
       "type": "number"
@@ -31,5 +31,19 @@
   },
   "required": [
     "name"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
 }

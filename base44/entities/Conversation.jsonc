@@ -4,7 +4,7 @@
   "properties": {
     "title": {
       "type": "string",
-      "description": "\u5bfe\u8a71\u306e\u898b\u51fa\u3057\uff08\u6700\u521d\u306e\u767a\u8a71\u304b\u3089\u81ea\u52d5\u3067\u3064\u304f\uff09"
+      "description": "対話の見出し（最初の発話から自動でつく）"
     },
     "mode": {
       "type": "string",
@@ -14,18 +14,18 @@
         "review"
       ],
       "default": "learn",
-      "description": "learn=\u5b66\u3073\u306e\u5bfe\u8a71 / coach=\u5b9f\u88c5\u306e\u4f34\u8d70 / review=\u30b3\u30fc\u30c9\u30ec\u30d3\u30e5\u30fc"
+      "description": "learn=学びの対話 / coach=実装の伴走 / review=コードレビュー"
     },
     "stack_id": {
       "type": "string",
-      "description": "\u571f\u53f0\u306b\u3057\u3066\u3044\u308b\u77e5\u8b58\u30b9\u30bf\u30c3\u30af"
+      "description": "土台にしている知識スタック"
     },
     "stack_name": {
       "type": "string"
     },
     "project_id": {
       "type": "string",
-      "description": "\u5b9f\u88c5\u306e\u4f34\u8d70\u306e\u3068\u304d\u306e\u5bfe\u8c61\u30d7\u30ed\u30b8\u30a7\u30af\u30c8"
+      "description": "実装の伴走のときの対象プロジェクト"
     },
     "summary": {
       "type": "string"
@@ -45,5 +45,19 @@
   },
   "required": [
     "title"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
 }
