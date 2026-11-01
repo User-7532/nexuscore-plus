@@ -92,34 +92,33 @@
 /* コードエディタ。見た目の設定にかかわらず暗色で表示する。
    tk-* は実行時に組み立てるクラス名なので、Tailwind のレイヤーの外に置いて削られないようにする */
 .code-surface {
-    background: #17140f;
-    border-color: #2d261d;
-    color: #ece3d6;
-  }
-  .code-bar,
-  .code-gutter {
-    border-color: #2d261d;
-  }
-  .code-gutter {
-    color: #8b7f6d;
-  }
-  .tk-kw {
-    color: #ff9d85;
-  }
-  .tk-str {
-    color: #b9d98f;
-  }
-  .tk-num {
-    color: #f2cf8b;
-  }
-  .tk-com {
-    color: #a4967f;
-    font-style: italic;
-  }
-  .tk-meta {
-    color: #cbb3e8;
-  }
-  .tk-fn {
-    color: #9dcfee;
-  }
+  background: #17140f;
+  border-color: #2d261d;
+  color: #ece3d6;
+}
+.code-bar,
+.code-gutter {
+  border-color: #2d261d;
+}
+.code-gutter {
+  color: #8b7f6d;
+}
+.tk-kw {
+  color: #ff9d85;
+}
+.tk-str {
+  color: #b9d98f;
+}
+.tk-num {
+  color: #f2cf8b;
+}
+.tk-com {
+  color: #a4967f;
+  font-style: italic;
+}
+.tk-meta {
+  color: #cbb3e8;
+}
+.tk-fn {
+  color: #9dcfee;
 }
