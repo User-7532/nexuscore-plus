@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import EmptyNote from '@/components/EmptyNote';
 import PracticeTabs from '@/components/practice/PracticeTabs';
 import PracticeQuestion from '@/components/practice/PracticeQuestion';
+import FieldPicker, { countByField, matchField } from '@/components/FieldPicker';
 
 const Chip = ({ active, onClick, children, title }) => (
   <button
@@ -28,7 +29,7 @@ export default function Practice() {
 
   const [cards, setCards] = useState(null);
   const [wrongIds, setWrongIds] = useState(new Set());
-  const [domain, setDomain] = useState('all');
+  const [place, setPlace] = useState({ field: 'all', subfield: '' });
   const [light, setLight] = useState(false);
   const [wrongOnly, setWrongOnly] = useState(false);
   const [deck, setDeck] = useState([]);
@@ -54,23 +55,20 @@ export default function Practice() {
       .catch(() => {});
   }, []);
 
-  const domains = useMemo(
-    () => [...new Set((cards || []).map((c) => c.domain).filter(Boolean))],
-    [cards]
-  );
+  const counts = useMemo(() => countByField(cards), [cards]);
 
   // 条件が変わったら山札を作り直す。カードから来たときは、その1枚を先頭にする
   useEffect(() => {
     if (cards === null) return;
     const pool = cards.filter(
-      (c) => (domain === 'all' || c.domain === domain) && (!wrongOnly || wrongIds.has(c.id))
+      (c) => matchField(c, place.field, place.subfield) && (!wrongOnly || wrongIds.has(c.id))
     );
     const focus = focusId ? cards.find((c) => c.id === focusId) : null;
     const rest = shuffle(pool.filter((c) => c.id !== focusId)).slice(0, focus ? 9 : 10);
     setDeck(focus ? [focus, ...rest] : rest);
     setIdx(0);
     setNote('');
-  }, [cards === null, domain, wrongOnly, focusId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [cards === null, place.field, place.subfield, wrongOnly, focusId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const card = deck[idx] || null;
 
