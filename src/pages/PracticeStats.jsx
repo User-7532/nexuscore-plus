@@ -5,6 +5,7 @@ import { Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { toISO } from '@/lib/srs';
 import PracticeTabs from '@/components/practice/PracticeTabs';
+import { FIELDS, fieldLabel, subfieldLabel } from '@/lib/taxonomy';
 
 const DAYS = 14;
 const UNDERSTANDING = ['これから', 'まだ曖昧', 'だいたいわかる', '人に話せる'];
@@ -22,18 +23,35 @@ export default function PracticeStats() {
       .catch(() => {});
   }, []);
 
-  // 分野ごとの正答率（言えた割合）
+  // 大分野ごとに、下位分野の言えた割合をまとめる。分類のない解答は「未分類」に入れる
   const byDomain = useMemo(() => {
     const acc = {};
     (attempts || []).forEach((a) => {
-      const d = a.domain || '分野なし';
-      acc[d] = acc[d] || { total: 0, ok: 0 };
-      acc[d].total += 1;
-      if (a.correct) acc[d].ok += 1;
+      const f = a.field || 'none';
+      const s = a.field ? a.subfield || '' : a.domain || '';
+      acc[f] = acc[f] || { total: 0, ok: 0, subs: {} };
+      acc[f].total += 1;
+      if (a.correct) acc[f].ok += 1;
+      acc[f].subs[s] = acc[f].subs[s] || { total: 0, ok: 0 };
+      acc[f].subs[s].total += 1;
+      if (a.correct) acc[f].subs[s].ok += 1;
     });
-    return Object.entries(acc)
-      .map(([name, v]) => ({ name, total: v.total, rate: Math.round((v.ok / v.total) * 100) }))
-      .sort((a, b) => a.rate - b.rate);
+    const order = [...FIELDS.map((f) => f.id), 'none'];
+    return order
+      .filter((id) => acc[id])
+      .map((id) => ({
+        id,
+        name: id === 'none' ? '未分類' : fieldLabel(id),
+        total: acc[id].total,
+        rate: Math.round((acc[id].ok / acc[id].total) * 100),
+        subs: Object.entries(acc[id].subs)
+          .map(([sid, v]) => ({
+            name: id === 'none' ? sid || '分野なし' : subfieldLabel(id, sid) || 'その他',
+            total: v.total,
+            rate: Math.round((v.ok / v.total) * 100),
+          }))
+          .sort((a, b) => a.rate - b.rate),
+      }));
   }, [attempts]);
 
   // 直近14日の解答数と、言えた割合
