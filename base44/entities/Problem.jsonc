@@ -1,0 +1,97 @@
+{
+  "name": "Problem",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "\u554f\u984c\u30bf\u30a4\u30c8\u30eb"
+    },
+    "statement": {
+      "type": "string",
+      "description": "\u554f\u984c\u6587\uff08\u5165\u51fa\u529b\u3068\u95a2\u6570\u30b7\u30b0\u30cd\u30c1\u30e3\u3092\u542b\u3080\uff09"
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": [
+        "basic",
+        "intermediate",
+        "advanced"
+      ],
+      "default": "basic"
+    },
+    "topics": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u30a2\u30eb\u30b4\u30ea\u30ba\u30e0\u4e0a\u306e\u30c8\u30d4\u30c3\u30af"
+    },
+    "field": {
+      "type": "string",
+      "description": "\u984c\u6750\u306b\u3057\u305f\u5927\u5206\u91ce\u306eID\uff08\u77e5\u8b58\u30ab\u30fc\u30c9\u3068\u540c\u3058\u5206\u985e\u3002\u7a7a\u306a\u3089\u4e00\u822c\u7684\u306a\u984c\u6750\uff09"
+    },
+    "theme": {
+      "type": "string",
+      "description": "\u984c\u6750\u306e\u8aac\u660e\uff08\u4f8b: \u30e9\u30a4\u30d5\u30b2\u30fc\u30e0\u3001\u30a8\u30f3\u30c8\u30ed\u30d4\u30fc\u306e\u8a08\u7b97\uff09"
+    },
+    "templates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "\u8a00\u8a9e\u3054\u3068\u306e\u521d\u671f\u30b3\u30fc\u30c9"
+    },
+    "test_cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "input": {
+            "type": "string"
+          },
+          "expected": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "constraints": {
+      "type": "string"
+    },
+    "expected_complexity": {
+      "type": "string"
+    },
+    "time_limit_minutes": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "title",
+    "statement"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}
