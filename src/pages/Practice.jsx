@@ -200,14 +200,10 @@ export default function Practice() {
               </div>
             )
           ) : (
-            <EmptyNote title={deck.length ? 'ひと回りしました' : '練習するカードがありません'}>
-              {wrongOnly
-                ? '出てこなかったままのカードはありません。'
-                : deck.length
-                  ? '今日の分はここまでで十分です。続けるなら、もう一度山札を作ります。'
-                  : '条件を変えてみてください。'}
-              {deck.length > 0 && (
-                <span className="mt-4 block">
+            <EmptyNote
+              title={deck.length ? 'ひと回りしました' : '練習するカードがありません'}
+              action={
+                deck.length > 0 && !wrongOnly ? (
                   <button
                     type="button"
                     onClick={() => {
@@ -218,8 +214,14 @@ export default function Practice() {
                   >
                     もう一周する
                   </button>
-                </span>
-              )}
+                ) : null
+              }
+            >
+              {wrongOnly
+                ? '出てこなかったままのカードはありません。'
+                : deck.length
+                  ? '今日の分はここまでで十分です。続けるなら、もう一度山札を作ります。'
+                  : '条件を変えてみてください。'}
             </EmptyNote>
           )}
         </>
