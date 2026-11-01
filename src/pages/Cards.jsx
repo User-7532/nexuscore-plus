@@ -198,6 +198,13 @@ export default function Cards() {
                   </div>
                 )}
 
+                <Link
+                  to={`/practice?card=${selected.id}`}
+                  className="flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-[12.5px] text-primary-foreground transition-opacity hover:opacity-90"
+                >
+                  この概念を問題で確かめる
+                </Link>
+
                 {selected.source_conversation_id && (
                   <Link
                     to={`/tutor?c=${selected.source_conversation_id}`}
