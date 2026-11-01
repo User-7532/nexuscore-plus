@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { findSubfield, INTERPRET_RULES } from '../../shared/taxonomy.ts';
 
 const SCHEMA = {
   type: 'object',
@@ -14,6 +15,8 @@ const SCHEMA = {
           model_answer: { type: 'string' },
           // 解答者が自分で答えるべき語句。問題文に出ていないかの確認に使う（保存はしない）
           target_terms: { type: 'array', items: { type: 'string' } },
+          // 解釈が中心の記述で、押さえるべき観点
+          rubric: { type: 'array', items: { type: 'string' } },
           explanation: { type: 'string' },
         },
         required: ['kind', 'text', 'answer', 'target_terms', 'explanation'],
@@ -63,13 +66,26 @@ export default async function (req) {
     const existingPage = await base44.entities.PracticeQuestion.filter({ card_id: cardId }, { limit: 20 });
     const existing = (existingPage.items || []).map((q) => String(q.text || '').slice(0, 60));
 
+    const place = findSubfield(String(card.field || ''), String(card.subfield || ''));
+    const interpret = place?.sub.mode === 'interpret';
+
+    // 解釈が中心の分野では、穴埋めは確かめられる事実だけを問い、記述は観点で判定する
+    const interpretBlock = interpret
+      ? `
+[この分野の扱い]
+- cloze は「確かめられること」に書かれた事実だけを空所にする。解釈を空所にしない。
+- written は、一つの正解がない問いにしてよい。rubric に、よい解答が押さえるべき観点を3〜4個書く。観点には「事実と解釈を分けて述べている」を必ず含める。特定の結論を観点にしない。
+- model_answer は解答の一例として書き、「確かめられること」と「解釈」を分ける。
+${INTERPRET_RULES}`
+      : '\n- rubric は空の配列にする。';
+
     const prompt = `あなたは学習者の知識カードから、理解を確かめる練習問題を作る出題者です。
 
 [知識カード]
 概念: ${card.title}
 分野: ${card.domain || '未設定'}
 要約: ${card.summary}
-共通する概念: ${(card.key_concepts || []).join(' / ') || 'なし'}
+${card.verifiable ? `確かめられること: ${card.verifiable}\n` : ''}${card.interpretation ? `解釈・仮説: ${card.interpretation}\n` : ''}共通する概念: ${(card.key_concepts || []).join(' / ') || 'なし'}
 次の問い: ${card.open_question || 'なし'}
 
 [作るもの]
@@ -81,6 +97,7 @@ export default async function (req) {
 - カードに書かれている内容と、その分野で確立している事実だけを使う。カードにない主張を作らない。
 - 専門用語は正確な標準用語で書き、比喩や曖昧な言い換えで中身を薄めない。日本語で、短く。
 - explanation は1〜2文で、なぜそうなるかを説明する。
+${interpretBlock}
 ${existing.length ? `\n[既にある問題（同じ内容は作らない）]\n- ${existing.join('\n- ')}` : ''}`;
 
     const result = await base44.asServiceRole.integrations.Core.InvokeLLM({ prompt, response_json_schema: SCHEMA });
@@ -93,9 +110,14 @@ ${existing.length ? `\n[既にある問題（同じ内容は作らない）]\n- 
       if (text.length < 10) return;
       if (kind === 'cloze' && !text.includes('___')) return;
       if (leaksAnswer(text, { ...q, kind })) return;
+      const rubric = interpret && kind === 'written' ? (Array.isArray(q?.rubric) ? q.rubric : []).map((r) => String(r).slice(0, 120)).slice(0, 5) : [];
       records.push({
         card_id: card.id,
         domain: card.domain || '',
+        field: card.field || '',
+        subfield: card.subfield || '',
+        assessment: rubric.length ? 'rubric' : 'exact',
+        rubric,
         kind,
         text,
         answer: String(q?.answer || '').slice(0, 200),
