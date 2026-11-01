@@ -136,6 +136,8 @@ export default function AssistantPanel({
             いま開いている画面と、これまでの記録を踏まえて答えます。
             <br />
             どの画面からでも、思いついたときに。
+            <br />
+            3往復ごとに、会話から知識カードが育ちます。
           </p>
         ) : (
           messages.map((m) => (
