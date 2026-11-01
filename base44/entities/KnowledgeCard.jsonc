@@ -71,9 +71,10 @@
       "type": "string",
       "enum": [
         "dialogue",
-        "field"
+        "field",
+        "assistant"
       ],
-      "description": "dialogue=対話から / field=分野を選んでAIが作成"
+      "description": "dialogue=学びの対話から / field=分野を選んでAIが作成 / assistant=全画面共通のAIチャットから"
     }
   },
   "required": [

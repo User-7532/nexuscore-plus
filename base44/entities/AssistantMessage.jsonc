@@ -8,15 +8,20 @@
         "user",
         "assistant"
       ],
-      "description": "\u767a\u8a00\u8005"
+      "description": "発言者"
     },
     "content": {
       "type": "string",
-      "description": "\u767a\u8a00\u5185\u5bb9"
+      "description": "発言内容"
     },
     "page": {
       "type": "string",
-      "description": "\u8a71\u3057\u304b\u3051\u305f\u3068\u304d\u306b\u958b\u3044\u3066\u3044\u305f\u753b\u9762"
+      "description": "話しかけたときに開いていた画面"
+    },
+    "cards_checked": {
+      "type": "boolean",
+      "default": false,
+      "description": "ここまでの会話を知識カードにしたときの印"
     }
   },
   "required": [
