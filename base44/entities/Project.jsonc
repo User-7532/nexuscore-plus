@@ -1,0 +1,91 @@
+{
+  "name": "Project",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "one_liner": {
+      "type": "string",
+      "description": "\u3072\u3068\u3053\u3068\u3067\u8a00\u3046\u3068\u4f55\u3092\u4f5c\u308b\u304b"
+    },
+    "motivation": {
+      "type": "string",
+      "description": "\u306a\u305c\u4f5c\u308b\u306e\u304b\u3002\u8ab0\u306e\u3069\u3093\u306a\u75db\u307f\u306b\u5411\u304b\u3046\u304b"
+    },
+    "stage": {
+      "type": "string",
+      "enum": [
+        "family",
+        "mind",
+        "community",
+        "society"
+      ],
+      "default": "family",
+      "description": "family=\u5bb6\u65cf\u30fb\u8eab\u8fd1\u306a\u8ab2\u984c / mind=\u81ea\u5206\u306e\u7cbe\u795e\u306e\u30cf\u30c3\u30af / community=\u8eab\u8fd1\u306a\u5171\u540c\u4f53 / society=\u793e\u4f1a\u5b9f\u88c5"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "idea",
+        "building",
+        "polishing",
+        "shipped"
+      ],
+      "default": "idea"
+    },
+    "next_step": {
+      "type": "string",
+      "description": "\u6b21\u306b\u3084\u308b\u4e00\u756a\u5c0f\u3055\u306a\u4e00\u6b69"
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "done": {
+            "type": "boolean"
+          }
+        }
+      },
+      "description": "\u5b9f\u88c5\u306e\u30b9\u30c6\u30c3\u30d7"
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "\u30d7\u30ed\u30b8\u30a7\u30af\u30c8\u306e\u30b3\u30fc\u30c9"
+    },
+    "related_card_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "last_review": {
+      "type": "string"
+    },
+    "last_review_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "github_url": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

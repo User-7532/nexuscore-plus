@@ -1,0 +1,35 @@
+{
+  "name": "LearningStack",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "\u5206\u91ce\u306e\u540d\u524d\uff08\u4f8b\uff1a\u80fd\u52d5\u7684\u63a8\u8ad6\uff09"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u3053\u306e\u5206\u91ce\u3092\u5b66\u3076\u7406\u7531\u30fb\u4f4d\u7f6e\u3065\u3051"
+    },
+    "focus_concepts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u3053\u306e\u5206\u91ce\u3067\u62bc\u3055\u3048\u305f\u3044\u6982\u5ff5"
+    },
+    "accent": {
+      "type": "string",
+      "description": "\u8868\u793a\u30c8\u30fc\u30f3\uff08clay / sage / sand / sky / dusk\uff09"
+    },
+    "sort_order": {
+      "type": "number"
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "name"
+  ]
+}
