@@ -1,0 +1,43 @@
+{
+  "name": "PracticeAttempt",
+  "type": "object",
+  "properties": {
+    "question_id": {
+      "type": "string"
+    },
+    "card_id": {
+      "type": "string"
+    },
+    "domain": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string"
+    },
+    "correct": {
+      "type": "boolean"
+    },
+    "mode": {
+      "type": "string",
+      "description": "practice / review"
+    }
+  },
+  "required": [
+    "card_id",
+    "correct"
+  ],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}
