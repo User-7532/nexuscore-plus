@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
+import AppearanceSettings from '@/components/AppearanceSettings';
 
 export default function Settings() {
   const { toast } = useToast();
@@ -124,6 +125,8 @@ export default function Settings() {
           </Button>
         </div>
       </section>
+
+      <AppearanceSettings />
 
       <section className="space-y-4">
         <div className="space-y-1.5">
