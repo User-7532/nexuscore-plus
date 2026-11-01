@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Link } from 'react-router-dom';
-import { Link2, Loader2, Search } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { Link2, Loader2, Plus, Search } from 'lucide-react';
+import FieldPicker, { countByField, matchField } from '@/components/FieldPicker';
+import { cardPlace, fieldLabel, subfieldOf } from '@/lib/taxonomy';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import EmptyNote from '@/components/EmptyNote';
@@ -17,25 +19,65 @@ const UNDERSTANDING = [
 
 export default function Cards() {
   const { toast } = useToast();
+  const [params, setParams] = useSearchParams();
+  const field = params.get('field') || 'all';
+  const subfield = params.get('sub') || '';
   const [query, setQuery] = useState('');
-  const [cards, setCards] = useState([]);
+  const [allCards, setAllCards] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
   const [selected, setSelected] = useState(null);
   const [related, setRelated] = useState([]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(true);
-      const filter = query.trim()
-        ? { $or: [{ title: { $regex: query.trim() } }, { summary: { $regex: query.trim() } }] }
-        : {};
-      base44.entities.KnowledgeCard.filter(filter, { sort: '-created_date', limit: 60 })
-        .then((page) => setCards(page.items || []))
-        .catch(() => setCards([]))
-        .finally(() => setLoading(false));
-    }, 280);
-    return () => clearTimeout(timer);
-  }, [query]);
+    base44.entities.KnowledgeCard.list({ sort: '-created_date', limit: 500 })
+      .then((page) => setAllCards(page.items || []))
+      .catch(() => setAllCards([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const counts = useMemo(() => countByField(allCards), [allCards]);
+
+  // 分野と言葉で絞り込む（記号もそのままの文字として探す）
+  const cards = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return allCards.filter(
+      (c) =>
+        matchField(c, field, subfield) &&
+        (!q || `${c.title} ${c.summary} ${(c.key_concepts || []).join(' ')}`.toLowerCase().includes(q))
+    );
+  }, [allCards, field, subfield, query]);
+
+  const chooseField = (f, s) => {
+    const next = new URLSearchParams(params);
+    if (f === 'all') next.delete('field');
+    else next.set('field', f);
+    if (s) next.set('sub', s);
+    else next.delete('sub');
+    setParams(next, { replace: true });
+  };
+
+  const sub = subfieldOf(field, subfield);
+
+  const generate = async () => {
+    if (!sub || generating) return;
+    setGenerating(true);
+    try {
+      const res = await base44.functions.invoke('generateFieldCards', { field, subfield, count: 3 });
+      if (res.data?.error) throw new Error(res.data.error);
+      const created = res.data?.created || [];
+      if (!created.length) {
+        toast({ title: '新しいカードは生まれませんでした', description: res.data?.reason });
+        return;
+      }
+      setAllCards((prev) => [...created, ...prev]);
+      toast({ title: `${created.length}枚のカードを作りました`, description: sub.label });
+    } catch (e) {
+      toast({ title: 'カードを作れませんでした', description: e.message, variant: 'destructive' });
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   const openCard = async (card) => {
     setSelected(card);
@@ -54,7 +96,7 @@ export default function Cards() {
   const setUnderstanding = async (value) => {
     const updated = await base44.entities.KnowledgeCard.update(selected.id, { understanding: value });
     setSelected({ ...selected, understanding: value });
-    setCards((prev) => prev.map((c) => (c.id === selected.id ? { ...c, understanding: value } : c)));
+    setAllCards((prev) => prev.map((c) => (c.id === selected.id ? { ...c, understanding: value } : c)));
     toast({ title: '理解の度合いを記録しました', description: UNDERSTANDING[value]?.label });
     return updated;
   };
@@ -64,9 +106,29 @@ export default function Cards() {
       <header className="space-y-1.5">
         <h1 className="text-[22px] leading-relaxed">知識カード</h1>
         <p className="text-[12.5px] text-muted-foreground">
-          対話から自動で生まれた概念たち。共通する概念どうしが、ひとりでにつながっています。
+          対話から生まれた概念と、分野を選んでAIが作った概念。共通する概念どうしが、ひとりでにつながっています。
         </p>
       </header>
+
+      <FieldPicker field={field} subfield={subfield} onChange={chooseField} counts={counts} />
+
+      {sub && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[20px] border border-dashed border-border bg-card/50 px-5 py-4">
+          <p className="text-[12px] leading-relaxed text-muted-foreground">
+            {fieldLabel(field)} / {sub.label}
+            {sub.mode === 'interpret' && '。解釈が中心の分野なので、確かめられることと解釈を分けて書きます'}
+          </p>
+          <button
+            type="button"
+            onClick={generate}
+            disabled={generating}
+            className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[12px] text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+          >
+            {generating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" strokeWidth={1.8} />}
+            {generating ? '作っています' : 'この分野のカードをAIで作る'}
+          </button>
+        </div>
+      )}
 
       <div className="relative">
         <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" strokeWidth={1.6} />
@@ -86,14 +148,18 @@ export default function Cards() {
         <EmptyNote
           title={query ? '見つかりませんでした' : 'まだカードがありません'}
           action={
-            <Link to="/tutor" className="rounded-full bg-primary px-5 py-2 text-[12.5px] text-primary-foreground">
-              対話をはじめる
-            </Link>
+            !query && !sub ? (
+              <Link to="/tutor" className="rounded-full bg-primary px-5 py-2 text-[12.5px] text-primary-foreground">
+                対話をはじめる
+              </Link>
+            ) : null
           }
         >
           {query
             ? '別の言葉で探してみてください。表記が少し違うだけかもしれません。'
-            : 'AIとの対話を3往復ほど続けると、その中から概念がカードとして自動で生まれます。'}
+            : sub
+              ? '上のボタンで、この分野の入口になる概念をAIが作ります。'
+              : 'AIとの対話を3往復ほど続けるか、上で下位分野を選ぶと、カードが生まれます。'}
         </EmptyNote>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
@@ -104,7 +170,7 @@ export default function Cards() {
               className="group rounded-[20px] border border-border/60 bg-card/70 p-5 text-left transition-all duration-500 hover:-translate-y-0.5 hover:border-border hover:bg-card"
             >
               <div className="flex items-start justify-between gap-3">
-                <p className="text-[10.5px] tracking-wide text-primary/80">{card.domain || '概念'}</p>
+                <p className="text-[10.5px] tracking-wide text-primary/80">{cardPlace(card)}</p>
                 {(card.related_card_ids || []).length > 0 && (
                   <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
                     <Link2 className="h-3 w-3" strokeWidth={1.8} />
@@ -133,12 +199,29 @@ export default function Cards() {
           {selected && (
             <>
               <SheetHeader className="space-y-2 pb-4 text-left">
-                <p className="text-[10.5px] tracking-wide text-primary/80">{selected.domain || '概念'}</p>
+                <p className="text-[10.5px] tracking-wide text-primary/80">{cardPlace(selected)}</p>
                 <SheetTitle className="text-[20px] leading-relaxed">{selected.title}</SheetTitle>
               </SheetHeader>
 
               <div className="space-y-7 pb-10">
                 <p className="whitespace-pre-wrap text-[13px] leading-[2] text-foreground">{selected.summary}</p>
+
+                {(selected.verifiable || selected.interpretation) && (
+                  <div className="space-y-2">
+                    {selected.verifiable && (
+                      <div className="rounded-[18px] border border-border/70 px-4 py-3.5">
+                        <p className="text-[10.5px] text-muted-foreground">確かめられること</p>
+                        <p className="mt-1 whitespace-pre-wrap text-[12.5px] leading-[1.9]">{selected.verifiable}</p>
+                      </div>
+                    )}
+                    {selected.interpretation && (
+                      <div className="rounded-[18px] border border-dashed border-border px-4 py-3.5">
+                        <p className="text-[10.5px] text-muted-foreground">解釈・仮説</p>
+                        <p className="mt-1 whitespace-pre-wrap text-[12.5px] leading-[1.9]">{selected.interpretation}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {(selected.key_concepts || []).length > 0 && (
                   <div className="space-y-2">
