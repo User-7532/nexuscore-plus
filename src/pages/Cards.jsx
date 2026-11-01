@@ -1,11 +1,22 @@
 import { useEffect, useMemo, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Link2, Loader2, Plus, Search } from 'lucide-react';
+import { Link2, Loader2, Plus, Search, Trash2 } from 'lucide-react';
 import FieldPicker, { countByField, matchField } from '@/components/FieldPicker';
 import { cardPlace, fieldLabel, subfieldOf } from '@/lib/taxonomy';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import EmptyNote from '@/components/EmptyNote';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
@@ -28,6 +39,7 @@ export default function Cards() {
   const [generating, setGenerating] = useState(false);
   const [selected, setSelected] = useState(null);
   const [related, setRelated] = useState([]);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     base44.entities.KnowledgeCard.list({ sort: '-created_date', limit: 500 })
@@ -99,6 +111,51 @@ export default function Cards() {
     setAllCards((prev) => prev.map((c) => (c.id === selected.id ? { ...c, understanding: value } : c)));
     toast({ title: '理解の度合いを記録しました', description: UNDERSTANDING[value]?.label });
     return updated;
+  };
+
+  // カードを消す。そのカードから作った練習問題と復習の予定も消し、ほかのカードやプロジェクトからのつながりも外す
+  const deleteCard = async () => {
+    if (!selected || deleting) return;
+    const id = selected.id;
+    setDeleting(true);
+    try {
+      const [questions, reviews, projects] = await Promise.all([
+        base44.entities.PracticeQuestion.filter({ card_id: id }, { limit: 200 }),
+        base44.entities.ReviewItem.filter({ card_id: id }, { limit: 50 }),
+        base44.entities.Project.list({ limit: 200 }),
+      ]);
+      await Promise.all([
+        ...(questions.items || []).map((q) => base44.entities.PracticeQuestion.delete(q.id)),
+        ...(reviews.items || []).map((r) => base44.entities.ReviewItem.delete(r.id)),
+      ]);
+      const linkedCards = allCards
+        .filter((c) => c.id !== id && (c.related_card_ids || []).includes(id))
+        .map((c) => ({ id: c.id, related_card_ids: c.related_card_ids.filter((x) => x !== id) }));
+      if (linkedCards.length) await base44.entities.KnowledgeCard.bulkUpdate(linkedCards);
+      const linkedProjects = (projects.items || []).filter((p) => (p.related_card_ids || []).includes(id));
+      await Promise.all(
+        linkedProjects.map((p) =>
+          base44.entities.Project.update(p.id, { related_card_ids: p.related_card_ids.filter((x) => x !== id) })
+        )
+      );
+      await base44.entities.KnowledgeCard.delete(id);
+
+      setAllCards((prev) =>
+        prev
+          .filter((c) => c.id !== id)
+          .map((c) =>
+            (c.related_card_ids || []).includes(id)
+              ? { ...c, related_card_ids: c.related_card_ids.filter((x) => x !== id) }
+              : c
+          )
+      );
+      setSelected(null);
+      toast({ title: 'カードを削除しました', description: selected.title });
+    } catch (e) {
+      toast({ title: '削除できませんでした', description: e.message, variant: 'destructive' });
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (
@@ -300,6 +357,38 @@ export default function Cards() {
                     この考えが生まれた対話をひらく
                   </Link>
                 )}
+
+                <div className="border-t border-border/60 pt-4">
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <button
+                        type="button"
+                        disabled={deleting}
+                        className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground transition-colors hover:text-destructive disabled:opacity-50"
+                      >
+                        {deleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" strokeWidth={1.7} />}
+                        このカードを削除
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>「{selected.title}」を削除しますか？</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          このカードから作った練習問題と復習の予定も一緒に消えます。これまでの解答の記録（統計）は残ります。削除したカードはアプリからは戻せません。
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>やめる</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={deleteCard}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          削除する
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </div>
             </>
           )}
