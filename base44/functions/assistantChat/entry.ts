@@ -24,7 +24,7 @@ export default async function (req) {
 
     const today = new Date().toISOString().slice(0, 10);
 
-    const [history, profiles, cards, attempts, reviews, projects, subs] = await Promise.all([
+    const [history, profiles, cards, attempts, reviews, projects, subs, memo] = await Promise.all([
       base44.entities.AssistantMessage.filter({}, { sort: '-created_date', limit: 14 }),
       base44.entities.Profile.list({ limit: 1 }),
       base44.entities.KnowledgeCard.list({ sort: '-created_date', limit: 300 }),
@@ -32,6 +32,7 @@ export default async function (req) {
       base44.entities.ReviewItem.filter({ due_date: { $lte: today } }, { limit: 200 }),
       base44.entities.Project.filter({ status: { $in: ['idea', 'building', 'polishing'] } }, { sort: '-updated_date', limit: 3 }),
       base44.entities.Submission.list({ sort: '-created_date', limit: 30 }).catch(() => ({ items: [] })),
+      memoryBlock(base44).catch(() => ''),
     ]);
 
     const profile = (profiles.items || [])[0];
@@ -80,6 +81,8 @@ export default async function (req) {
 - 最後に問いかけや次の提案を付けない。答え終わったらそこで終える。
 - 見出し記号やアスタリスクは使わない。
 ${INTERPRET_RULES}
+
+${memo}
 
 [本人]
 ${profile?.ultimate_goal ? `目的: ${profile.ultimate_goal}` : '目的は未設定'}

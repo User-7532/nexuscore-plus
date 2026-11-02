@@ -6,6 +6,7 @@ import {
   buildProjectBlock,
   buildTranscript,
 } from '../../shared/tutorContext.ts';
+import { memoryBlock } from '../../shared/memory.ts';
 
 export default async function (req) {
   try {
@@ -43,10 +44,12 @@ export default async function (req) {
       : null;
 
     const mode = conversation.mode || 'learn';
+    const memo = await memoryBlock(base44).catch(() => '');
 
     const prompt = [
       TUTOR_IDENTITY,
       modeInstruction(mode),
+      memo,
       buildStackBlock(stack),
       buildProjectBlock(project, mode),
       `[これまでの対話]\n${buildTranscript(history)}`,
