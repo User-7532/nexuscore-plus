@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { TUTOR_IDENTITY } from '../../shared/tutorContext.ts';
 import { FIELDS, INTERPRET_RULES } from '../../shared/taxonomy.ts';
+import { memoryBlock } from '../../shared/memory.ts';
 
 const fieldName = (id) => FIELDS.find((f) => f.id === id)?.label || '未分類';
 
@@ -12,7 +13,8 @@ export default async function (req) {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json().catch(() => ({}));
-    const message = String(body.message || '').trim().slice(0, 1500);
+    // 長い文章をそのまま貼って相談できるようにする（過去の発言は短く切って使う）
+    const message = String(body.message || '').trim().slice(0, 60000);
     const page = String(body.page || '').slice(0, 60);
     const path = String(body.path || '').slice(0, 120);
     const pageContext = String(body.context || '').trim().slice(0, 1800);

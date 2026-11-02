@@ -1,0 +1,29 @@
+{
+  "name": "AssistantMemory",
+  "type": "object",
+  "properties": {
+    "summary": {
+      "type": "string",
+      "description": "ほかのAIとの会話などから分かった、本人の目標・理解できたこと・つまずき・好み。AIの返答に使う"
+    },
+    "updated_from": {
+      "type": "string",
+      "description": "最後に更新したきっかけ（import など）"
+    }
+  },
+  "required": [],
+  "rls": {
+    "read": {
+      "created_by_id": "{{user.id}}"
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "created_by_id": "{{user.id}}"
+    },
+    "delete": {
+      "created_by_id": "{{user.id}}"
+    }
+  }
+}

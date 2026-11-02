@@ -60,13 +60,14 @@ function sharesConcept(a, b) {
 
 // AIが返したカードを、重複を除いて保存し、既存のカードと共通概念でつなぐ
 // extra: どの会話から生まれたか（source, source_conversation_id, stack_id など）
-export async function saveTalkCards(base44, rawCards, extra = {}, fallbackDomain = '') {
+// max: 1回に保存する上限（ふつうの会話は4枚、ほかのAIとの会話を取り込むときは多め）
+export async function saveTalkCards(base44, rawCards, extra = {}, fallbackDomain = '', max = 4) {
   const existingPage = await base44.entities.KnowledgeCard.list({ sort: '-created_date', limit: 200 });
   const existing = existingPage.items || [];
   const existingTitles = new Set(existing.map((c) => String(c.title || '').trim().toLowerCase()));
   const existingConcepts = existing.map((c) => ({ id: c.id, concepts: normalizedConcepts(c) }));
 
-  const fresh = (rawCards || []).slice(0, 4).filter((card) => {
+  const fresh = (rawCards || []).slice(0, max).filter((card) => {
     const key = String(card.title || '').trim().toLowerCase();
     if (!key || existingTitles.has(key)) return false;
     existingTitles.add(key);
