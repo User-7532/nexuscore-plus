@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { GripHorizontal, Loader2, Maximize2, Minimize2, Quote, Search, Send, X } from 'lucide-react';
+import { ClipboardPaste, GripHorizontal, Loader2, Maximize2, Minimize2, Quote, Search, Send, X } from 'lucide-react';
+import { IMPORT_MAX, IMPORT_MIN } from '@/lib/external-import';
 import MessageSearch from '@/components/assistant/MessageSearch';
 
 const CHIPS = [
@@ -15,6 +16,8 @@ export default function AssistantPanel({
   messages,
   busy,
   onSend,
+  onImport,
+  importing = false,
   onClose,
   onLoadFrom,
   expanded,
@@ -77,6 +80,14 @@ export default function AssistantPanel({
   const submit = () => {
     if (!draft.trim() || busy) return;
     onSend(draft);
+    setDraft('');
+  };
+
+  // 入力欄に貼った長い文章を、ほかのAIとの会話として取り込む
+  const canImport = !!onImport && !busy && draft.trim().length >= IMPORT_MIN;
+  const runImport = () => {
+    if (!canImport) return;
+    onImport(draft);
     setDraft('');
   };
 
@@ -224,7 +235,7 @@ export default function AssistantPanel({
               submit();
             }}
             rows={expanded ? 2 : 1}
-            maxLength={1500}
+            maxLength={IMPORT_MAX}
             placeholder={quote ? 'この部分について、どう聞きますか？' : '何でも話しかけてください'}
             className="max-h-32 min-h-10 flex-1 resize-none rounded-2xl border border-border/70 bg-background px-3.5 py-2.5 text-[12.5px] leading-relaxed outline-none focus:border-primary/40"
           />
