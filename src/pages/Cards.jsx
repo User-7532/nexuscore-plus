@@ -362,6 +362,10 @@ export default function Cards() {
                   この概念を問題で確かめる
                 </Link>
 
+                {selected.source === 'import' && (
+                  <p className="text-[12px] text-muted-foreground">ほかのAIとの会話を取り込んで作ったカードです。</p>
+                )}
+
                 {selected.source === 'assistant' && (
                   <p className="text-[12px] text-muted-foreground">AIチャットでの会話から生まれたカードです。</p>
                 )}
