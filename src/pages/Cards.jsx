@@ -18,6 +18,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import EmptyNote from '@/components/EmptyNote';
+import ExternalImport from '@/components/ExternalImport';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -166,6 +167,22 @@ export default function Cards() {
           対話から生まれた概念と、分野を選んでAIが作った概念。共通する概念どうしが、ひとりでにつながっています。
         </p>
       </header>
+
+      <ExternalImport
+        onDone={(result) => {
+          // 取り込んだカードを一覧の先頭に足す
+          setAllCards((prev) => [...result.cards, ...prev.filter((c) => !result.cards.some((n) => n.id === c.id))]);
+          const extra = [
+            `今日の復習に${result.scheduled}枚`,
+            result.problems.length ? `コーディング問題${result.problems.length}問` : '',
+            result.memoryUpdated ? 'AIの記憶を更新' : '',
+          ].filter(Boolean);
+          toast({
+            title: `知識カードを${result.cards.length}枚作りました`,
+            description: `${extra.join('・')}${result.errors.length ? `（うまくいかなかったもの: ${result.errors.join('、')}）` : ''}`,
+          });
+        }}
+      />
 
       <FieldPicker field={field} subfield={subfield} onChange={chooseField} counts={counts} />
 
