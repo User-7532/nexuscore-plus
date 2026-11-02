@@ -6,6 +6,7 @@ import { useToast } from '@/components/ui/use-toast';
 import AssistantPanel from '@/components/assistant/AssistantPanel';
 import useDragPosition from '@/hooks/use-drag-position';
 import { onAskSelection } from '@/lib/selection-ask';
+import { importExternal, importReport } from '@/lib/external-import';
 
 const PAGE_LABEL = {
   '/': '今日',
@@ -47,6 +48,7 @@ export default function AssistantChat() {
   const [messages, setMessages] = useState(null);
   const [busy, setBusy] = useState(false);
   const [quote, setQuote] = useState('');
+  const [importing, setImporting] = useState(false);
   const { pathname } = useLocation();
   const { toast } = useToast();
   const drag = useDragPosition();
@@ -140,6 +142,32 @@ export default function AssistantChat() {
     }
   };
 
+  // 入力欄に貼った、ほかのAIとの会話を取り込む。結果は会話にも残す
+  const runImport = async (raw) => {
+    const text = String(raw || '').trim();
+    if (!text || busy) return;
+    const label = `ほかのAIとの会話を取り込む（${text.length.toLocaleString()}字）`;
+    setOpen(true);
+    setBusy(true);
+    setImporting(true);
+    setMessages((prev) => [...(prev || []), { id: `u-${Date.now()}`, role: 'user', content: label }]);
+    try {
+      const result = await importExternal(text);
+      const report = importReport(result);
+      setMessages((prev) => [...(prev || []), { id: `a-${Date.now()}`, role: 'assistant', content: report }]);
+      // 取り込みの報告は会話の記録に残すが、カードづくりの対象にはしない（cards_checked で印をつける）
+      base44.entities.AssistantMessage.bulkCreate([
+        { role: 'user', content: label, page: '取り込み' },
+        { role: 'assistant', content: report, page: '取り込み', cards_checked: true },
+      ]).catch(() => {});
+    } catch (e) {
+      toast({ title: '取り込めませんでした', description: e.message, variant: 'destructive' });
+    } finally {
+      setBusy(false);
+      setImporting(false);
+    }
+  };
+
   const toggleExpand = () => {
     // 広げる・戻すときは、画面からはみ出さないよう位置をもとに戻す
     drag.reset();
@@ -162,6 +190,8 @@ export default function AssistantChat() {
             messages={messages}
             busy={busy}
             onSend={send}
+            onImport={runImport}
+            importing={importing}
             onClose={() => setOpen(false)}
             onLoadFrom={loadFrom}
             expanded={expanded}

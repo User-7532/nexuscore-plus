@@ -189,7 +189,8 @@ export default function AssistantPanel({
         )}
         {busy && (
           <div className="flex items-center gap-1.5 px-1 text-[11.5px] text-muted-foreground">
-            <Loader2 className="h-3 w-3 animate-spin" /> 考えています
+            <Loader2 className="h-3 w-3 animate-spin" />
+            {importing ? '会話を取り込んでいます（1〜2分かかることがあります）' : '考えています'}
           </div>
         )}
         <div ref={bottomRef} />
@@ -223,6 +224,12 @@ export default function AssistantPanel({
             </button>
           ))}
         </div>
+        {onImport && draft.trim().length > 800 && (
+          <p className="mb-1.5 flex items-center justify-between gap-2 text-[10.5px] text-muted-foreground">
+            <span>ほかのAIとの会話なら、送るボタンの左の取り込みボタンで、知識カードや問題に反映できます。</span>
+            <span className="shrink-0 tabular-nums">{draft.trim().length.toLocaleString()} / {IMPORT_MAX.toLocaleString()}字</span>
+          </p>
+        )}
         <div className="flex items-end gap-2">
           <textarea
             ref={inputRef}
@@ -239,6 +246,17 @@ export default function AssistantPanel({
             placeholder={quote ? 'この部分について、どう聞きますか？' : '何でも話しかけてください'}
             className="max-h-32 min-h-10 flex-1 resize-none rounded-2xl border border-border/70 bg-background px-3.5 py-2.5 text-[12.5px] leading-relaxed outline-none focus:border-primary/40"
           />
+          {onImport && (
+            <button
+              type="button"
+              onClick={runImport}
+              disabled={!canImport}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border/70 text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary disabled:opacity-40"
+              title="入力欄に貼った、ほかのAIとの会話を取り込む（知識カード・今日の復習・コーディング問題・AIの記憶に反映）"
+            >
+              <ClipboardPaste className="h-3.5 w-3.5" strokeWidth={1.7} />
+            </button>
+          )}
           <button
             type="button"
             onClick={submit}
