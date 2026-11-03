@@ -3,23 +3,30 @@
   "properties": {
     "cards_checked": {
       "default": false,
-      "description": "\u3053\u3053\u307e\u3067\u306e\u4f1a\u8a71\u3092\u77e5\u8b58\u30ab\u30fc\u30c9\u306b\u3057\u305f\u3068\u304d\u306e\u5370",
+      "description": "ここまでの会話を知識カードにしたときの印",
       "type": "boolean"
     },
     "content": {
-      "description": "\u767a\u8a00\u5185\u5bb9",
+      "description": "発言内容",
       "type": "string"
     },
     "page": {
-      "description": "\u8a71\u3057\u304b\u3051\u305f\u3068\u304d\u306b\u958b\u3044\u3066\u3044\u305f\u753b\u9762",
+      "description": "話しかけたときに開いていた画面",
       "type": "string"
     },
     "quote": {
-      "description": "\u753b\u9762\u3067\u9078\u3093\u3067\u8cea\u554f\u3057\u305f\u6587\u7ae0\uff08\u5f15\u7528\uff09",
+      "description": "画面で選んで質問した文章（引用）",
       "type": "string"
     },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "添付した画像の保存先（本人だけが見られる保存先の場所）"
+    },
     "role": {
-      "description": "\u767a\u8a00\u8005",
+      "description": "発言者",
       "enum": [
         "user",
         "assistant"
