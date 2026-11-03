@@ -1,11 +1,23 @@
 import { base44 } from '@/api/base44Client';
+import { signedUrls } from '@/lib/attachments';
+
+// 添付した画像（会話のスクリーンショットなど）を文字に起こし、貼り付けた文章に足す
+async function withImageText(text, uris) {
+  if (!uris || !uris.length) return text;
+  const urls = await signedUrls(uris);
+  const res = await base44.functions.invoke('readImages', { urls });
+  if (res.data?.error) throw new Error(res.data.error);
+  const read = String(res.data?.text || '').trim();
+  if (!read) return text;
+  return [text, `[添付した画像から読み取った内容]\n${read}`].filter(Boolean).join('\n\n');
+}
 
 export const IMPORT_MAX = 60000;
 export const IMPORT_MIN = 40;
 
 // ほかのAIとの会話を取り込み、知識カード・今日の復習・AIの記憶・コーディング問題に反映する
-export async function importExternal(raw) {
-  const text = String(raw || '').trim().slice(0, IMPORT_MAX);
+export async function importExternal(raw, imageUris = []) {
+  const text = (await withImageText(String(raw || '').trim(), imageUris)).slice(0, IMPORT_MAX);
   if (text.length < IMPORT_MIN) throw new Error('貼り付けた文章が短すぎます。対話をそのまま貼り付けてください。');
 
   const [mainRes, lastSub] = await Promise.allSettled([

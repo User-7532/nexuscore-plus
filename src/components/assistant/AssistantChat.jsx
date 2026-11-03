@@ -7,6 +7,7 @@ import AssistantPanel from '@/components/assistant/AssistantPanel';
 import useDragPosition from '@/hooks/use-drag-position';
 import { onAskSelection } from '@/lib/selection-ask';
 import { importExternal, importReport } from '@/lib/external-import';
+import { signedUrls } from '@/lib/attachments';
 
 const PAGE_LABEL = {
   '/': '今日',
@@ -36,7 +37,7 @@ const visibleContext = () => {
   return text.slice(0, 1700);
 };
 
-const toMessage = (m) => ({ id: m.id, role: m.role, content: m.content, quote: m.quote || '', created_date: m.created_date });
+const toMessage = (m) => ({ id: m.id, role: m.role, content: m.content, quote: m.quote || '', images: m.images || [], created_date: m.created_date });
 
 // 古い順に並べる。質問と返事は同じ時刻で保存されるので、同時刻はIDの順（質問が先）にする
 const byTime = (a, b) =>
@@ -116,17 +117,23 @@ export default function AssistantChat() {
     []
   );
 
-  const send = async (raw) => {
-    const text = String(raw || '').trim();
+  const send = async (raw, imgs = []) => {
+    const uris = imgs.map((i) => i.uri);
+    // 画像だけを送ったときは、画像について聞いたことにする
+    const text = String(raw || '').trim() || (uris.length ? 'この画像について教えて' : '');
     if (!text || busy) return;
     const currentQuote = quote;
     setOpen(true);
     setBusy(true);
     setQuote('');
-    setMessages((prev) => [...(prev || []), { id: `u-${Date.now()}`, role: 'user', content: text, quote: currentQuote }]);
+    setMessages((prev) => [...(prev || []), { id: `u-${Date.now()}`, role: 'user', content: text, quote: currentQuote, images: uris, previews: imgs.map((i) => i.preview) }]);
     try {
+      // 画像は、AIが読める期限つきのURLにして渡す（保存するのは保存先の場所だけ）
+      const imageUrls = uris.length ? await signedUrls(uris) : [];
       const res = await base44.functions.invoke('assistantChat', {
         message: text,
+        images: imageUrls,
+        image_uris: uris,
         quote: currentQuote,
         page: pageLabelOf(pathname),
         path: pathname,
@@ -143,21 +150,22 @@ export default function AssistantChat() {
   };
 
   // 入力欄に貼った、ほかのAIとの会話を取り込む。結果は会話にも残す
-  const runImport = async (raw) => {
+  const runImport = async (raw, imgs = []) => {
     const text = String(raw || '').trim();
-    if (!text || busy) return;
-    const label = `ほかのAIとの会話を取り込む（${text.length.toLocaleString()}字）`;
+    const uris = imgs.map((i) => i.uri);
+    if ((!text && !uris.length) || busy) return;
+    const label = `ほかのAIとの会話を取り込む（${[text ? `${text.length.toLocaleString()}字` : '', uris.length ? `画像${uris.length}枚` : ''].filter(Boolean).join('・')}）`;
     setOpen(true);
     setBusy(true);
     setImporting(true);
-    setMessages((prev) => [...(prev || []), { id: `u-${Date.now()}`, role: 'user', content: label }]);
+    setMessages((prev) => [...(prev || []), { id: `u-${Date.now()}`, role: 'user', content: label, images: uris, previews: imgs.map((i) => i.preview) }]);
     try {
-      const result = await importExternal(text);
+      const result = await importExternal(text, uris);
       const report = importReport(result);
       setMessages((prev) => [...(prev || []), { id: `a-${Date.now()}`, role: 'assistant', content: report }]);
       // 取り込みの報告は会話の記録に残すが、カードづくりの対象にはしない（cards_checked で印をつける）
       base44.entities.AssistantMessage.bulkCreate([
-        { role: 'user', content: label, page: '取り込み' },
+        { role: 'user', content: label, page: '取り込み', images: uris },
         { role: 'assistant', content: report, page: '取り込み', cards_checked: true },
       ]).catch(() => {});
     } catch (e) {

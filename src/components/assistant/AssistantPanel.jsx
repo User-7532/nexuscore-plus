@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { ClipboardPaste, GripHorizontal, Loader2, Maximize2, Minimize2, Quote, Search, Send, X } from 'lucide-react';
+import { ImagePlus, ClipboardPaste, GripHorizontal, Loader2, Maximize2, Minimize2, Quote, Search, Send, X } from 'lucide-react';
 import { IMPORT_MAX, IMPORT_MIN } from '@/lib/external-import';
 import MessageSearch from '@/components/assistant/MessageSearch';
+import { ImageStrip, MessageImages } from '@/components/assistant/ImageStrip';
+import { MAX_IMAGES, imagesFromClipboard, useImageAttachments } from '@/lib/attachments';
 
 const CHIPS = [
   'この画面の内容を、もう少し噛みくだいて',
@@ -31,6 +33,9 @@ export default function AssistantPanel({
   const [searching, setSearching] = useState(false);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
+  // 添付する画像（貼り付け・選択した時点でアップロードを始める）
+  const att = useImageAttachments();
+  const fileRef = useRef(null);
   const msgRefs = useRef({});
   // 読み込みを待ってから移動する発言のID
   const pendingJump = useRef(null);
@@ -78,17 +83,20 @@ export default function AssistantPanel({
   };
 
   const submit = () => {
-    if (!draft.trim() || busy) return;
-    onSend(draft);
+    if ((!draft.trim() && !att.ready.length) || busy || att.uploading) return;
+    onSend(draft, att.ready);
     setDraft('');
+    att.clear();
   };
 
   // 入力欄に貼った長い文章を、ほかのAIとの会話として取り込む
-  const canImport = !!onImport && !busy && draft.trim().length >= IMPORT_MIN;
+  // 会話のスクリーンショットだけでも取り込める
+  const canImport = !!onImport && !busy && !att.uploading && (draft.trim().length >= IMPORT_MIN || att.ready.length > 0);
   const runImport = () => {
     if (!canImport) return;
-    onImport(draft);
+    onImport(draft, att.ready);
     setDraft('');
+    att.clear();
   };
 
   // サジェストは送らずに入力欄へ入れ、手を加えてから送れるようにする
@@ -177,6 +185,9 @@ export default function AssistantPanel({
                   m.role === 'user' ? 'bg-primary/10' : 'bg-secondary/60'
                 }`}
               >
+                {(m.images?.length > 0 || m.previews?.length > 0) && (
+                  <MessageImages uris={m.images || []} previews={m.previews || []} />
+                )}
                 {m.quote && (
                   <p className="mb-1.5 border-l-2 border-primary/40 pl-2 text-[11px] leading-relaxed text-muted-foreground">
                     {m.quote}
@@ -224,6 +235,8 @@ export default function AssistantPanel({
             </button>
           ))}
         </div>
+        <ImageStrip images={att.images} onRemove={att.remove} />
+        {att.error && <p className="mb-1.5 text-[10px] text-destructive">{att.error}</p>}
         {onImport && draft.trim().length > 800 && (
           <p className="mb-1.5 flex items-center justify-between gap-2 text-[10.5px] text-muted-foreground">
             <span>ほかのAIとの会話なら、送るボタンの左の取り込みボタンで、知識カードや問題に反映できます。</span>
@@ -235,6 +248,11 @@ export default function AssistantPanel({
             ref={inputRef}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
+            onPaste={(e) => {
+              // 画像が貼り付けられたら添付する（文字の貼り付けはそのまま）
+              const files = imagesFromClipboard(e);
+              if (files.length) att.add(files);
+            }}
             onKeyDown={(e) => {
               // 変換中のEnterは送信せず、確定に使う
               if (e.key !== 'Enter' || e.shiftKey || e.nativeEvent.isComposing) return;
@@ -246,6 +264,26 @@ export default function AssistantPanel({
             placeholder={quote ? 'この部分について、どう聞きますか？' : '何でも話しかけてください'}
             className="max-h-32 min-h-10 flex-1 resize-none rounded-2xl border border-border/70 bg-background px-3.5 py-2.5 text-[12.5px] leading-relaxed outline-none focus:border-primary/40"
           />
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={(e) => {
+              att.add(e.target.files);
+              e.target.value = '';
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            disabled={busy || att.images.length >= MAX_IMAGES}
+            className="flex h-10 w-10 rounded-full shrink-0 items-center justify-center border border-border/70 text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary disabled:opacity-40"
+            title={`画像を添付する（${MAX_IMAGES}枚まで。入力欄に貼り付けても添付できます）`}
+          >
+            <ImagePlus className="h-3.5 w-3.5" />
+          </button>
           {onImport && (
             <button
               type="button"
@@ -260,7 +298,7 @@ export default function AssistantPanel({
           <button
             type="button"
             onClick={submit}
-            disabled={busy || !draft.trim()}
+            disabled={busy || att.uploading || (!draft.trim() && !att.ready.length)}
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
             title="送る"
           >
