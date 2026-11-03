@@ -170,7 +170,7 @@ export default function Practice() {
             loadingQ ? (
               <div className="flex h-48 flex-col items-center justify-center gap-2 rounded-[22px] border border-border/60 bg-card/60 text-muted-foreground">
                 <Loader2 className="h-5 w-5 animate-spin" strokeWidth={1.6} />
-                <p className="text-[12px]">「{card.title}」の問題を用意しています</p>
+                <p className="text-[12px]">問題を用意しています</p>
               </div>
             ) : question ? (
               <>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Check, Loader2, X } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { cardPlace } from '@/lib/taxonomy';
+import { revealsAnswer } from '@/lib/answer-guard';
 
 // 練習問題1問。穴埋めは自己採点、記述はAIが判定する。
 // 穴埋めの空所には、隠しているあいだ答えの文字を置かない（切り替え時に一瞬見えるのを防ぐ）
@@ -16,6 +17,9 @@ export default function PracticeQuestion({ question, card, onResult, onSkip }) {
   // 解釈が中心の問いは、一つの正解ではなく観点で判定する
   const rubric = question.assessment === 'rubric' ? question.rubric || [] : [];
   const parts = String(question.text || '').split('___');
+  // カードの名前は答えそのものになりやすいので、答えを見る（判定が出る）までは出さない
+  const answered = written ? !!verdict : revealed;
+  const place = cardPlace(card);
 
   const judge = async () => {
     if (!draft.trim() || busy) return;
@@ -37,7 +41,11 @@ export default function PracticeQuestion({ question, card, onResult, onSkip }) {
       <div className="rounded-[22px] border border-border/70 bg-card p-6">
         <div className="flex items-center justify-between gap-3">
           <p className="text-[10.5px] tracking-wide text-primary/80">
-            {cardPlace(card)} ・ {card.title}
+            {answered
+              ? `${place} ・ ${card.title}`
+              : revealsAnswer(place, question)
+                ? '知識カード'
+                : place}
           </p>
           <span className="shrink-0 rounded-full bg-secondary px-2.5 py-0.5 text-[10px] text-muted-foreground">
             {written ? (rubric.length ? '記述・観点で判定' : '記述') : '穴埋め'}

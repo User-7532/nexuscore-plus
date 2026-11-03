@@ -100,7 +100,7 @@ export default function PracticeReview() {
             {loadingQ ? (
               <div className="flex h-48 flex-col items-center justify-center gap-2 rounded-[22px] border border-border/60 bg-card/60 text-muted-foreground">
                 <Loader2 className="h-5 w-5 animate-spin" strokeWidth={1.6} />
-                <p className="text-[12px]">「{card.title}」の問題を用意しています</p>
+                <p className="text-[12px]">問題を用意しています</p>
               </div>
             ) : question ? (
               <PracticeQuestion key={question.id} question={question} card={card} onResult={onResult} />
@@ -164,7 +164,8 @@ export default function PracticeReview() {
               <div className="divide-y divide-border/60 overflow-hidden rounded-[20px] border border-border/60 bg-card/70">
                 {upcoming.map((r) => (
                   <div key={r.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                    <span className="min-w-0 truncate text-[12.5px]">{r.title}</span>
+                    {/* カードの名前は、その日の問題の答えになりやすいので出さない */}
+                    <span className="min-w-0 truncate text-[12.5px]">{r.domain || '知識カード'}</span>
                     <span className="shrink-0 text-[11px] text-muted-foreground">{dayLabel(r.due_date)}</span>
                   </div>
                 ))}
