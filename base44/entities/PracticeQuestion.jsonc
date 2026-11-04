@@ -1,35 +1,33 @@
 {
   "name": "PracticeQuestion",
-  "type": "object",
   "properties": {
+    "answer": {
+      "description": "\u7a7a\u6240\u306b\u5165\u308b\u8a9e\u53e5\uff08\u8a18\u8ff0\u3067\u306f\u8981\u70b9\uff09",
+      "type": "string"
+    },
+    "assessment": {
+      "default": "exact",
+      "description": "exact=\u6b63\u8aa4\u3067\u5224\u5b9a / rubric=\u62bc\u3055\u3048\u308b\u3079\u304d\u89b3\u70b9\u3067\u5224\u5b9a",
+      "enum": [
+        "exact",
+        "rubric"
+      ],
+      "type": "string"
+    },
     "card_id": {
-      "type": "string",
-      "description": "もとになった知識カード"
+      "description": "\u3082\u3068\u306b\u306a\u3063\u305f\u77e5\u8b58\u30ab\u30fc\u30c9",
+      "type": "string"
     },
     "domain": {
-      "type": "string",
-      "description": "分野名（カードから引き継ぐ）"
+      "description": "\u5206\u91ce\u540d\uff08\u30ab\u30fc\u30c9\u304b\u3089\u5f15\u304d\u7d99\u3050\uff09",
+      "type": "string"
     },
-    "kind": {
-      "type": "string",
-      "enum": [
-        "cloze",
-        "written"
-      ],
-      "default": "cloze",
-      "description": "cloze=穴埋め / written=記述"
-    },
-    "text": {
-      "type": "string",
-      "description": "穴埋めの文章（空所は ___）または記述の問い"
-    },
-    "answer": {
-      "type": "string",
-      "description": "空所に入る語句（記述では要点）"
-    },
-    "model_answer": {
-      "type": "string",
-      "description": "記述の模範解答"
+    "expected_points": {
+      "description": "\u8a18\u8ff0\u3067\u554f\u3044\u304c\u6c42\u3081\u3066\u3044\u308b\u8981\u7d20\uff08\u63a1\u70b9\u306e\u89b3\u70b9\uff09",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
     },
     "explanation": {
       "type": "string"
@@ -37,24 +35,37 @@
     "field": {
       "type": "string"
     },
-    "subfield": {
+    "kind": {
+      "default": "cloze",
+      "description": "cloze=\u7a74\u57cb\u3081 / written=\u8a18\u8ff0",
+      "enum": [
+        "cloze",
+        "written"
+      ],
       "type": "string"
     },
-    "assessment": {
-      "type": "string",
-      "enum": [
-        "exact",
-        "rubric"
-      ],
-      "default": "exact",
-      "description": "exact=正誤で判定 / rubric=押さえるべき観点で判定"
+    "model_answer": {
+      "description": "\u8a18\u8ff0\u306e\u6a21\u7bc4\u89e3\u7b54",
+      "type": "string"
+    },
+    "refined": {
+      "default": false,
+      "description": "\u8a18\u8ff0\u554f\u984c\u306e\u805e\u304d\u65b9\u3092\u898b\u76f4\u3057\u305f\u304b\uff08\u7b54\u3048\u306e\u7bc4\u56f2\u304c\u5b9a\u307e\u308b\u3088\u3046\u306b\u89b3\u70b9\u30fb\u6570\u3092\u8db3\u3057\u305f\u304b\u3069\u3046\u304b\uff09",
+      "type": "boolean"
     },
     "rubric": {
-      "type": "array",
+      "description": "\u89b3\u70b9\u65b9\u5f0f\u3067\u5224\u5b9a\u3059\u308b\u3068\u304d\u306e\u89b3\u70b9",
       "items": {
         "type": "string"
       },
-      "description": "観点方式で判定するときの観点"
+      "type": "array"
+    },
+    "subfield": {
+      "type": "string"
+    },
+    "text": {
+      "description": "\u7a74\u57cb\u3081\u306e\u6587\u7ae0\uff08\u7a7a\u6240\u306f ___\uff09\u307e\u305f\u306f\u8a18\u8ff0\u306e\u554f\u3044",
+      "type": "string"
     }
   },
   "required": [
@@ -62,6 +73,7 @@
     "text",
     "answer"
   ],
+  "type": "object",
   "rls": {
     "read": {
       "created_by_id": "{{user.id}}"
