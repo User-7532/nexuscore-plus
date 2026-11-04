@@ -17,6 +17,8 @@ const SCHEMA = {
           target_terms: { type: 'array', items: { type: 'string' } },
           // 解釈が中心の記述で、押さえるべき観点
           rubric: { type: 'array', items: { type: 'string' } },
+          // 記述で、問いが求めている要素（採点の観点）
+          expected_points: { type: 'array', items: { type: 'string' } },
           explanation: { type: 'string' },
         },
         required: ['kind', 'text', 'answer', 'target_terms', 'explanation'],
@@ -92,6 +94,8 @@ ${card.verifiable ? `確かめられること: ${card.verifiable}\n` : ''}${card
 2問つくる。1問目は cloze（空所補充）、2問目は written（記述）。
 - cloze: 1〜2文で、空所を ___（半角アンダースコア3つ）で1か所だけ表す。answer には空所の語句を短く入れる。カードの中心となる用語か、その用語を支える重要な語を空所にする。
 - written: 仕組み・理由・ほかの概念とのつながりを自分の言葉で説明させる問い。model_answer に2〜4文の模範解答、answer に要点を10〜20字で入れる。
+- written の問いは、何を答えれば正解かが解答者に分かる聞き方にする。「どのような〜があるか」「〜について説明せよ」だけの、正しい答えが何通りもある問いにしない。求める観点・数・場面を問いに書く（例:「〜が起こる理由を、分子レベルと行動レベルから1つずつ説明せよ」「〜と〜の違いを2点挙げよ」）。観点を書いても、答えそのものの語句は問いに書かない。
+- written の expected_points には、問いが求めている要素を問いの観点・数に合わせて1〜4個、問いの条件として書く（例:「分子レベルの理由を1つ」）。cloze では空の配列。
 - 問題文に答えを書かない。空所の語句、答えさせたい名前・略称・正式名称、その一部や英語表記・括弧書きの補足も、問題文には入れない。
 - target_terms には、解答者が自分で答えるべき語句をすべて入れる。説明させる問いで、主題として問題文に出てよい語は入れない。
 - カードに書かれている内容と、その分野で確立している事実だけを使う。カードにない主張を作らない。
@@ -122,6 +126,12 @@ ${existing.length ? `\n[既にある問題（同じ内容は作らない）]\n- 
         text,
         answer: String(q?.answer || '').slice(0, 200),
         model_answer: kind === 'written' ? String(q?.model_answer || '').slice(0, 800) : '',
+        expected_points:
+          kind === 'written' && Array.isArray(q?.expected_points)
+            ? q.expected_points.map((p) => String(p).trim().slice(0, 120)).filter(Boolean).slice(0, 4)
+            : [],
+        // 新しい記述問題は、作る時点で観点・数を指定している
+        refined: kind === 'written',
         explanation: String(q?.explanation || '').slice(0, 600),
       });
     });
