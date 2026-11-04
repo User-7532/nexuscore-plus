@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { pickQuestion, questionsFor, recordPractice, shuffle } from '@/lib/practice';
+import { pickQuestion, questionsFor, recordPractice, refineOldQuestionsInBackground, shuffle } from '@/lib/practice';
 import { cn } from '@/lib/utils';
 import EmptyNote from '@/components/EmptyNote';
 import PracticeTabs from '@/components/practice/PracticeTabs';
@@ -40,6 +40,7 @@ export default function Practice() {
   const [tally, setTally] = useState({ correct: 0, wrong: 0 });
 
   useEffect(() => {
+    refineOldQuestionsInBackground();
     base44.entities.KnowledgeCard.list({ sort: '-created_date', limit: 300 })
       .then((page) => setCards(page.items || []))
       .catch(() => setCards([]));
