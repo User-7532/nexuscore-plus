@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Loader2, RotateCcw } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { todayISO } from '@/lib/srs';
-import { pickQuestion, questionsFor, recordPractice } from '@/lib/practice';
+import { pickQuestion, questionsFor, recordPractice, refineOldQuestionsInBackground } from '@/lib/practice';
 import EmptyNote from '@/components/EmptyNote';
 import PracticeTabs from '@/components/practice/PracticeTabs';
 import PracticeQuestion from '@/components/practice/PracticeQuestion';
@@ -23,6 +23,7 @@ export default function PracticeReview() {
   const [done, setDone] = useState({ correct: 0, wrong: 0 });
 
   useEffect(() => {
+    refineOldQuestionsInBackground();
     base44.entities.ReviewItem.list({ sort: 'due_date', limit: 300 })
       .then(async (page) => {
         const list = page.items || [];
